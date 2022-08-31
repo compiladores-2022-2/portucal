@@ -55,6 +55,13 @@ col_dir     "]"
 cha_esq     "{"
 cha_dir     "}"
 
+menos       "-"					 
+mais        "+"					
+mult        "*"					
+div         "/"					
+mod 				"%"
+exp         "^"
+
 quebra_linha "\n"
 comentario "//"(.)*
 
@@ -270,6 +277,36 @@ erro "."
 {id} {
   printf(">> Token: ID (id %d), Valor: %s\t\n", ID, yytext);
   return ID;
+}
+
+{menos} {
+  printf(">> Token: MENOS (id %d)\n", MENOS);
+  return MENOS;
+}
+
+{mais} {
+  printf(">> Token: MAIS (id %d)\n", MAIS);
+  return MAIS;
+}
+
+{mult} {
+  printf(">> Token: MULT (id %d)\n", MULT);
+  return MULT;
+}
+
+{div} {
+  printf(">> Token: DIV (id %d)\n", DIV);
+  return DIV;
+}
+
+{mod} {
+  printf(">> Token: MOD (id %d)\n", MOD);
+  return MOD;
+}
+
+{exp} {
+  printf(">> Token: EXP (id %d)\n", EXP);
+  return EXP;
 }
 
 {comentario} {

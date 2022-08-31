@@ -47,9 +47,15 @@ enum TOKEN_ID {
   CHA_DIR,
   DOIS_PONTOS,
   PONTO_VIRG,
-  ERRO,
+  MENOS,
+  MAIS,
+  MULT,
+  DIV,
+  MOD,
+  EXP,
   QUEBRA_LINHA,
-  COMENTARIO
+  COMENTARIO,
+  ERRO
 };
 
 #endif
