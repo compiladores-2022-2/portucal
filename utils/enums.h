@@ -32,6 +32,11 @@ enum TOKEN_ID {
   FLUT,
   CARAC,
   REF,
+  VERDADEIRO,
+  FALSO,
+  OU,
+  E,
+  NAO,
   DOIS_PONTOS,
   PONTO_VIRG,
   ERRO

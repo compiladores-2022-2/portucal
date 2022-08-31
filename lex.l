@@ -38,6 +38,12 @@ flut        "flut"
 carac       "carac"
 ref         "ref"
 
+verdadeiro  "verdadeiro"
+falso       "falso" 
+ou          "ou" 			
+e           "e"			
+nao         "!"
+
 dois_pontos ":"
 ponto_virg  ";"
 
@@ -178,6 +184,31 @@ erro "."
 {dois_pontos} {
   printf(">> Token: DOIS_PONTOS (id %d)\n", DOIS_PONTOS);
   return DOIS_PONTOS;
+}
+
+{verdadeiro} {
+  printf(">> Token: VERDADEIRO (id %d)\n", VERDADEIRO);
+  return VERDADEIRO;
+}
+
+{falso} {
+  printf(">> Token: FALSO (id %d)\n", FALSO);
+  return FALSO;
+}
+
+{ou} {
+  printf(">> Token: OU (id %d)\n", OU);
+  return OU;
+}
+
+{e} {
+  printf(">> Token: E (id %d)\n", E);
+  return E;
+}
+
+{nao} {
+  printf(">> Token: NAO (id %d)\n", NAO);
+  return NAO;
 }
 
 {ponto_virg} {
