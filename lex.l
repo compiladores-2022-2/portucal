@@ -58,6 +58,20 @@ col_dir     "]"
 cha_esq     "{"
 cha_dir     "}"
 
+menos       "-"					 
+mais        "+"					
+mult        "*"					
+div         "/"					
+mod 				"%"
+exp         "^"
+
+maior       ">"					
+menor       "<"					
+maior_igual ">="				
+menor_igual "<="				
+igual       "="
+diferente   "!="
+
 quebra_linha "\n"
 comentario "//"(.)*
 
@@ -317,10 +331,70 @@ erro "."
   return ID;
 }
 
+{menos} {
+  printf(">> Token: MENOS (id %d)\n", MENOS);
+  return MENOS;
+}
+
+{mais} {
+  printf(">> Token: MAIS (id %d)\n", MAIS);
+  return MAIS;
+}
+
+{mult} {
+  printf(">> Token: MULT (id %d)\n", MULT);
+  return MULT;
+}
+
+{div} {
+  printf(">> Token: DIV (id %d)\n", DIV);
+  return DIV;
+}
+
+{mod} {
+  printf(">> Token: MOD (id %d)\n", MOD);
+  return MOD;
+}
+
+{exp} {
+  printf(">> Token: EXP (id %d)\n", EXP);
+  return EXP;
+}
+
 {comentario} {
   printf(">> Token: COMENTARIO (id %d)\n", COMENTARIO);
   collumn_counter += yyleng;
   return COMENTARIO;
+}
+
+{maior} {
+  printf(">> Token: MAIOR (id %d)\n", MAIOR);
+  return MAIOR;
+}
+
+{menor} {
+  printf(">> Token: MENOR (id %d)\n", MENOR);
+  return MENOR;
+}
+
+{maior_igual} {
+  printf(">> Token: MAIOR_IGUAL (id %d)\n", MAIOR_IGUAL);
+  return MAIOR_IGUAL;
+}
+
+{menor_igual} {
+  printf(">> Token: MENOR_IGUAL (id %d)\n", MENOR_IGUAL);
+  return MENOR_IGUAL;
+}
+
+{igual} {
+  printf(">> Token: IGUAL (id %d)\n", IGUAL);
+  return IGUAL;
+}
+
+{diferente} {
+  printf(">> Token: DIFERENTE (id %d)\n", DIFERENTE);
+  return DIFERENTE;
 }
 
 {quebra_linha} {
