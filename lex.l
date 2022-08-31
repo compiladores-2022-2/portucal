@@ -33,6 +33,10 @@ bloco       "bloco"
 tipo        "tipo"
 
 int         "int"
+logico      "logico"
+flut        "flut"
+carac       "carac"
+ref         "ref"
 
 dois_pontos ":"
 ponto_virg  ";"
@@ -149,6 +153,26 @@ erro "."
 {int} {
   printf(">> Token: INT (id %d)\n", INT);
   return INT;
+}
+
+{logico} {
+  printf(">> Token: LOGICO (id %d)\n", LOGICO);
+  return LOGICO;
+}
+
+{flut} {
+  printf(">> Token: FLUT (id %d)\n", FLUT);
+  return FLUT;
+}
+
+{carac} {
+  printf(">> Token: CARAC (id %d)\n", CARAC);
+  return CARAC;
+}
+
+{ref} {
+  printf(">> Token: REF (id %d)\n", REF);
+  return REF;
 }
 
 {dois_pontos} {

@@ -28,6 +28,10 @@ enum TOKEN_ID {
   BLOCO,
   TIPO,
   INT,
+  LOGICO,
+  FLUT,
+  CARAC,
+  REF,
   DOIS_PONTOS,
   PONTO_VIRG,
   ERRO
