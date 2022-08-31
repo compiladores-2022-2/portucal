@@ -24,6 +24,13 @@ leia        "leia"
 imprima     "imprima"
 
 var         "var"
+const       "const"
+declrs      "declrs"
+proc        "proc"
+func        "func"
+estrutura   "estrutura"
+bloco       "bloco"
+tipo        "tipo"
 
 int         "int"
 
@@ -102,6 +109,41 @@ erro "."
 {var} {
   printf(">> Token: VAR (id %d)\n", VAR);
   return VAR;
+}
+
+{const} {
+  printf(">> Token: CONST (id %d)\n", CONST);
+  return CONST;
+}
+
+{declrs} {
+  printf(">> Token: DECLRS (id %d)\n", DECLRS);
+  return DECLRS;
+}
+
+{proc} {
+  printf(">> Token: PROC (id %d)\n", PROC);
+  return PROC;
+}
+
+{func} {
+  printf(">> Token: FUNC (id %d)\n", FUNC);
+  return FUNC;
+}
+
+{estrutura} {
+  printf(">> Token: ESTRUTURA (id %d)\n", ESTRUTURA);
+  return ESTRUTURA;
+}
+
+{bloco} {
+  printf(">> Token: BLOCO (id %d)\n", BLOCO);
+  return BLOCO;
+}
+
+{tipo} {
+  printf(">> Token: TIPO (id %d)\n", TIPO);
+  return TIPO;
 }
 
 {int} {
