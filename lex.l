@@ -46,6 +46,17 @@ nao         "!"
 
 dois_pontos ":"
 ponto_virg  ";"
+ponto       "."
+virgula     ","
+par_esq     "("
+par_dir     ")"
+col_esq     "["
+col_dir     "]"
+cha_esq     "{"
+cha_dir     "}"
+
+quebra_linha "\n"
+comentario "//"(.)*
 
 erro "."
 
@@ -216,9 +227,59 @@ erro "."
   return PONTO_VIRG;
 }
 
+{ponto} {
+  printf(">> Token: PONTO (id %d)\n", PONTO);
+  return PONTO;
+}
+
+{virgula} {
+  printf(">> Token: VIRGULA (id %d)\n", VIRGULA);
+  return VIRGULA;
+}
+
+{par_esq} {
+  printf(">> Token: PAR_ESQ (id %d)\n", PAR_ESQ);
+  return PAR_ESQ;
+}
+
+{par_dir} {
+  printf(">> Token: PAR_DIR (id %d)\n", PAR_DIR);
+  return PAR_DIR;
+}
+
+{col_esq} {
+  printf(">> Token: COL_ESQ (id %d)\n", COL_ESQ);
+  return COL_ESQ;
+}
+
+{col_dir} {
+  printf(">> Token: COL_DIR (id %d)\n", COL_DIR);
+  return COL_DIR;
+}
+
+{cha_esq} {
+  printf(">> Token: CHA_ESQ (id %d)\n", CHA_ESQ);
+  return CHA_ESQ;
+}
+
+{cha_dir} {
+  printf(">> Token: CHA_DIR (id %d)\n", CHA_DIR);
+  return CHA_DIR;
+}
+
 {id} {
   printf(">> Token: ID (id %d), Valor: %s\t\n", ID, yytext);
   return ID;
+}
+
+{comentario} {
+  printf(">> Token: COMENTARIO (id %d)\n", COMENTARIO);
+  return COMENTARIO;
+}
+
+{quebra_linha} {
+  printf(">> Token: QUEBRA_LINHA (id %d)\n", QUEBRA_LINHA);
+  return QUEBRA_LINHA;
 }
 
 %%

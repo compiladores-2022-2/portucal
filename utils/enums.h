@@ -37,9 +37,19 @@ enum TOKEN_ID {
   OU,
   E,
   NAO,
+  PONTO,
+  VIRGULA,
+  PAR_ESQ,
+  PAR_DIR,
+  COL_ESQ,
+  COL_DIR,
+  CHA_ESQ,
+  CHA_DIR,
   DOIS_PONTOS,
   PONTO_VIRG,
-  ERRO
+  ERRO,
+  QUEBRA_LINHA,
+  COMENTARIO
 };
 
 #endif
