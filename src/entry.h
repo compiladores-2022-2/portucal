@@ -2,7 +2,7 @@
 #define ENTRY
 
 typedef struct Entry {
-  int x;
+  char x[50];
 } Entry;
 
 #endif
