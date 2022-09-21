@@ -1,6 +1,6 @@
 # Portucal
 
 ## Running
-1. `flex lex.l`
-2. `gcc lex.yy.c`
-3. `./a.out`
+1. `lex lex.l`
+2. `make parser`
+3. `./parser < examples/ex1`
