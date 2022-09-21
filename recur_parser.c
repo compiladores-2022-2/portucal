@@ -13,7 +13,6 @@ void eat(enum TOKEN_ID t) {
   else error();
 }
 
-void S();
 void PROGRAMA();
 void DEFINICOES();
 void DECLARACOES();
@@ -53,7 +52,6 @@ void ENQUANTO_();
 void FACA_ENQUANTO();
 void PARA_();
 void EXPR_OU_VAZIO();
-void EXPR();
 void T_OR();
 void EXPR_P();
 void T_AND();
@@ -70,11 +68,9 @@ void T_UN();
 void T_PAR_ID();
 void CAST_();
 void EXPR_FOLHA();
-void TIPO_();
 void CHAMADA_FUNC_OU_VAZIO();
 void MODIFICADORES_OU_VAZIO();
 void MOD_TYPE();
-void ARGS_FUNC_OU_VAZIO();
 void EXPR();
 void ARGS_FUNC_OU_VAZIO();
 void ARGS_FUNC();
@@ -99,14 +95,6 @@ void C_T_EXPO();
 void C_T_UN();
 void C_T_PAR_ID();
 
-
-void S() { switch (tok) {
-  case CONST: case DECLRS: case BLOCO:{
-    PROGRAMA();
-    break;
-  }
- default: error();
-}}
 
 void PROGRAMA() { switch (tok) {
   case CONST: case DECLRS: case BLOCO:{
@@ -1063,5 +1051,5 @@ void C_T_FATOR_P(){ switch(tok){
 
 int main(){
   advance();
-  S();
+  PROGRAMA();
 }
