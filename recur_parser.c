@@ -125,6 +125,7 @@ void LISTA_DEFINICOES_OU_VAZIO() { switch (tok) {
 void DEFINICAO() { switch (tok) {
   case ID: {
     eat(ID); eat(IGUAL); LITERAL();
+    break;
   }
   default: error();
 }}
@@ -144,6 +145,7 @@ void LISTA_DECLARACOES_OU_VAZIO() { switch (tok) {
   case CHA_DIR: { break; }
   case PONTO_VIRG: { 
     eat(PONTO_VIRG); DECLARACAO(); LISTA_DECLARACOES_OU_VAZIO();
+    break;
   }
   default: error();
 }}
@@ -171,6 +173,7 @@ void DECLARACAO() { switch (tok) {
 void DEC_VAR() { switch (tok) {
   case VAR: {
     eat(VAR); eat(ID); IDS_OU_VAZIO(); eat(DOIS_PONTOS); TIPO_();
+    break;
   }
   default: error();
 }}
@@ -309,6 +312,7 @@ void LISTA_DEC_VAR() { switch (tok) {
   case CHA_DIR: { break; }
   case PONTO_VIRG: {
     eat(PONTO_VIRG); LISTA_DEC_VAR();
+    break;
   }
   default: error();
 }}
@@ -782,7 +786,7 @@ void MOD_TYPE() { switch (tok) {
 }}
 
 void MODIFICADORES_OU_VAZIO() { switch (tok) {
-  case CHA_DIR: case PONTO_VIRG: case DOIS_PONTOS: 
+  case CHA_DIR: case PONTO_VIRG: case DOIS_PONTOS: case IGUAL:
   case VIRGULA : case PAR_DIR : case COL_ESQ: case COL_DIR: 
   case OU: case E: case IGUAL_IGUAL : case DIFERENTE : 
   case MENOR_IGUAL : case MAIOR_IGUAL : case MENOR : 
