@@ -1,0 +1,17 @@
+const{
+  z = 4
+}
+
+declrs{
+  var x : int;
+  var y : logico;
+  func fu(a : int) : int {
+}
+
+}
+
+bloco{
+  enquanto(z >= 0){
+    z = z - 1
+  }
+}

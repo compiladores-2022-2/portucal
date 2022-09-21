@@ -5,7 +5,6 @@ enum TOKEN_ID {
   DIG,
   ALPHA,
   ID,
-  EOF,
   NUM_FLUT,
   NUM_INT,
   CONTINUE,
