@@ -5,7 +5,7 @@ const{
 declrs{
   var x : int;
   var y : logico;
-  func fu(a : int) : int { 
+  funque fu(a : int) : int { {
     continue
   }
 

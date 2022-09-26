@@ -12,7 +12,7 @@ CFLAGS = -I$(srcdir) -fsanitize=address,undefined -fno-omit-frame-pointer -g -Wa
 
 tester: $(objects)
 	gcc -o tester $(objects) $(CFLAGS)
-$(objdir)/tester.o: $(srcdir)/token_id.h $(srcdir)/entry.h $(srcdir)/linked_trie_node.h $(srcdir)/symb_table.h
+$(objdir)/tester.o: $(srcdir)/token_id.h $(srcdir)/rule_id.h $(srcdir)/entry.h $(srcdir)/linked_trie_node.h $(srcdir)/symb_table.h
 	mkdir -p obj
 	lex lex.l
 	gcc -c lex.yy.c -o $(objdir)/tester.o $(CFLAGS)

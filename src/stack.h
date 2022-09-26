@@ -49,6 +49,8 @@ void pop(SymbolStack *s){
     // digo que topo nao tem nxt
     s->last->next = NULL;
 
+    s->size = s->size - 1;
+
     free(to_del->symb);
     free(to_del);
   }
