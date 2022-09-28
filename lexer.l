@@ -1,7 +1,7 @@
 %{
 
-#include "src/token_id.h"
-#include "src/symb_table.h"
+#include "token_id.h"
+#include "symb_table.h"
 
 int collumn_counter = 0;
 

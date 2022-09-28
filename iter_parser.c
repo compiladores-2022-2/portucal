@@ -2,8 +2,7 @@
 #include "src/rule_id.h"
 #include "src/stack.h"
 #include <assert.h>
-#include "lex.yy.c"
-
+#include "src/lex.yy.c"
 
 enum TOKEN_ID tok;
 void advance() {tok=yylex();}
@@ -17,6 +16,7 @@ SymbolStack * s;
 
 void _ARGS_FUNC_OU_VAZIO();
 void _ATRIBUICAO();
+void _ATRIBUICAO_OU_CHAMADA_PROC();
 void _BLOCO();
 void _BLOCO_OU_SE();
 void _CASOS_ESCOLHA();
@@ -136,6 +136,26 @@ void _ATRIBUICAO(){ switch (tok) {
 		push_terminal(s,IGUAL);
 		push_non_terminal(s, E_MODIFICADORES_OU_VAZIO);
 		push_terminal(s,ID);
+		break;
+		}
+	default: error();
+}} 
+
+void _ATRIBUICAO_OU_CHAMADA_PROC(){ switch (tok) {
+	case IGUAL:
+	case COL_ESQ:
+	case PONTO:{
+		pop(s);
+		push_non_terminal(s, E_EXPR);
+		push_terminal(s,IGUAL);
+		push_non_terminal(s, E_MODIFICADORES_OU_VAZIO);
+		break;
+		}
+	case PAR_ESQ:{
+		pop(s);
+		push_terminal(s,PAR_DIR);
+		push_non_terminal(s, E_ARGS_FUNC_OU_VAZIO);
+		push_terminal(s,PAR_ESQ);
 		break;
 		}
 	default: error();
@@ -281,7 +301,8 @@ void _COLCHETES_OU_VAZIO(){ switch (tok) {
 void _COMANDO(){ switch (tok) {
 	case ID:{
 		pop(s);
-		push_non_terminal(s, E_ATRIBUICAO);
+		push_non_terminal(s, E_ATRIBUICAO_OU_CHAMADA_PROC);
+		push_terminal(s,ID);
 		break;
 		}
 	case BLOCO:{
@@ -1863,7 +1884,7 @@ void _T_UN(){ switch (tok) {
 		break;
 		}
 	default: error();
-}} 
+}}
 
 int main(){
   s = create_stack();
@@ -1886,6 +1907,7 @@ int main(){
       switch (s_top->type.rule) {
 				case E_ARGS_FUNC_OU_VAZIO: _ARGS_FUNC_OU_VAZIO(); break;
 				case E_ATRIBUICAO: _ATRIBUICAO(); break;
+				case E_ATRIBUICAO_OU_CHAMADA_PROC: _ATRIBUICAO_OU_CHAMADA_PROC(); break;
 				case E_BLOCO: _BLOCO(); break;
 				case E_BLOCO_OU_SE: _BLOCO_OU_SE(); break;
 				case E_CASOS_ESCOLHA: _CASOS_ESCOLHA(); break;
@@ -1970,7 +1992,7 @@ int main(){
 				case E_T_REL: _T_REL(); break;
 				case E_T_REL_P: _T_REL_P(); break;
 				case E_T_UN: _T_UN(); break;
-        default: error();
+       default: error();
       }
     }
   } 

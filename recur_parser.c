@@ -1,5 +1,5 @@
 #include "src/token_id.h"
-#include "lex.yy.c"
+#include "src/lex.yy.c"
 
 enum TOKEN_ID tok;
 void advance() {
@@ -16,6 +16,7 @@ void eat(enum TOKEN_ID t) {
 
 void _ARGS_FUNC_OU_VAZIO();
 void _ATRIBUICAO();
+void _ATRIBUICAO_OU_CHAMADA_PROC();
 void _BLOCO();
 void _BLOCO_OU_SE();
 void _CASOS_ESCOLHA();
@@ -131,6 +132,18 @@ void _ATRIBUICAO(){ switch (tok) {
 	default: error();
 }} 
 
+void _ATRIBUICAO_OU_CHAMADA_PROC(){ switch (tok) {
+	case IGUAL:
+	case COL_ESQ:
+	case PONTO:{
+		_MODIFICADORES_OU_VAZIO(); eat(IGUAL); _EXPR(); break;
+	}
+	case PAR_ESQ:{
+		eat(PAR_ESQ); _ARGS_FUNC_OU_VAZIO(); eat(PAR_DIR); break;
+	}
+	default: error();
+}} 
+
 void _BLOCO(){ switch (tok) {
 	case CHA_ESQ:{
 		eat(CHA_ESQ); _DECLARACOES(); _COMANDO(); _LISTA_COMANDOS_OU_VAZIO(); eat(CHA_DIR); break;
@@ -231,7 +244,7 @@ void _COLCHETES_OU_VAZIO(){ switch (tok) {
 
 void _COMANDO(){ switch (tok) {
 	case ID:{
-		_ATRIBUICAO(); break;
+		eat(ID); _ATRIBUICAO_OU_CHAMADA_PROC(); break;
 	}
 	case BLOCO:{
 		_NOVO_BLOCO(); break;
