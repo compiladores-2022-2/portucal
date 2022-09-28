@@ -109,6 +109,7 @@ maior       ">"
 menor       "<"					
 maior_igual ">="				
 menor_igual "<="				
+igual_igual "=="
 igual       "="
 diferente   "!="
 
@@ -497,6 +498,13 @@ erro "."
   printf("token position: %d\n", collumn_counter);
   collumn_counter += yyleng;
   return MENOR_IGUAL;
+}
+
+{igual_igual} {
+  printf(">> Token: IGUAL_IGUAL (id %d)\n", IGUAL);
+  printf("token position: %d\n", collumn_counter);
+  collumn_counter += yyleng;
+  return IGUAL_IGUAL;
 }
 
 {igual} {
