@@ -2,11 +2,10 @@
 #define _TOKEN_ID_ENUM
 
 enum TOKEN_ID {
-  DIG,
-  ALPHA,
   ID,
-  NUM_FLUT,
-  NUM_INT,
+  LIT_CHAR,
+  LIT_FLUT,
+  LIT_INT,
   CONTINUE,
   PARE,
   SE,
@@ -19,7 +18,7 @@ enum TOKEN_ID {
   PADRAO,
   RETORNE,
   LEIA,
-  IMPRIMA,
+  ESCREVA,
   VAR,
   CONST,
   DECLRS,

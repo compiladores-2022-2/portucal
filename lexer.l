@@ -51,15 +51,17 @@ num_int     [-+]?{dig}{dig}*
 continue    "continue"
 pare        "pare"
 se          "se"
-senao       "senão"
+senao       "senao"
 enquanto    "enquanto"
-faca        "faça"
+faca        "faca"
 para        "para"
 escolha     "escolha"
 caso        "caso"
+padrao      "padrao"
+
 retorne     "retorne"
 leia        "leia"
-imprima     "imprima"
+escreva     "escreva"
 
 var         "var"
 const       "const"
@@ -94,12 +96,13 @@ col_esq     "["
 col_dir     "]"
 cha_esq     "{"
 cha_dir     "}"
+cast        "%"
 
 menos       "-"					 
 mais        "+"					
 mult        "*"					
 div         "/"					
-mod 				"%"
+mod 				"mod"
 exp         "^"
 
 maior       ">"					
@@ -117,17 +120,17 @@ erro "."
 %%
 
 {num_flut} {
-  printf(">> Token: NUM_FLUT (id %d), Valor: %s\t\n", NUM_FLUT, yytext);
+  printf(">> Token: LIT_FLUT (id %d), Valor: %s\t\n", LIT_FLUT, yytext);
   printf("token position: %d\n", collumn_counter);
   collumn_counter += yyleng;
-  return NUM_FLUT;
+  return LIT_FLUT;
 }
 
 {num_int} {
-  printf(">> Token: NUM_INT (id %d), Valor: %s\t\n", NUM_INT, yytext);
+  printf(">> Token: LIT_INT (id %d), Valor: %s\t\n", LIT_INT, yytext);
   printf("token position: %d\n", collumn_counter);
   collumn_counter += yyleng;
-  return NUM_INT;
+  return LIT_INT;
 }
 
 {continue} {
@@ -200,11 +203,11 @@ erro "."
   return RETORNE;
 }
 
-{imprima} {
-  printf(">> Token: IMPRIMA (id %d)\n", IMPRIMA);
+{escreva} {
+  printf(">> Token: ESCREVA (id %d)\n", ESCREVA);
   printf("token position: %d\n", collumn_counter);
   collumn_counter += yyleng;
-  return IMPRIMA;
+  return ESCREVA;
 }
 
 {var} {
@@ -219,6 +222,12 @@ erro "."
   printf("token position: %d\n", collumn_counter);
   collumn_counter += yyleng;
   return CONST;
+}
+
+{mod} {
+  printf(">> Token: MOD (id %d)\n", MOD);
+  printf("token position: %d\n", collumn_counter);
+  return MOD;
 }
 
 {declrs} {
@@ -368,6 +377,14 @@ erro "."
   return PAR_ESQ;
 }
 
+{cast} {
+  printf(">> Token: CAST (id %d)\n", CAST);
+  printf("token position: %d\n", collumn_counter);
+  collumn_counter += yyleng;
+  return CAST;
+}
+
+
 {par_dir} {
   printf(">> Token: PAR_DIR (id %d)\n", PAR_DIR);
   printf("token position: %d\n", collumn_counter);
@@ -439,12 +456,6 @@ erro "."
   printf(">> Token: DIV (id %d)\n", DIV);
   printf("token position: %d\n", collumn_counter);
   return DIV;
-}
-
-{mod} {
-  printf(">> Token: MOD (id %d)\n", MOD);
-  printf("token position: %d\n", collumn_counter);
-  return MOD;
 }
 
 {exp} {
