@@ -1,5 +1,5 @@
-#include "src/token_id.h"
-#include "src/lex.yy.c"
+#include "token_id.h"
+#include "lex.yy.c"
 
 enum TOKEN_ID tok;
 void advance() {

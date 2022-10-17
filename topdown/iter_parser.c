@@ -1,8 +1,8 @@
-#include "src/token_id.h"
-#include "src/rule_id.h"
-#include "src/stack.h"
+#include "token_id.h"
+#include "rule_id.h"
+#include "stack.h"
 #include <assert.h>
-#include "src/lex.yy.c"
+#include "lex.yy.c"
 
 enum TOKEN_ID tok;
 void advance() {tok=yylex();}

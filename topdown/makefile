@@ -1,6 +1,6 @@
 # Pastas
-srcdir = ./src
-objdir = ./obj
+srcdir = ../src
+objdir = ../obj
 
 #Vars
 lexico = $(srcdir)/lex.yy.c
