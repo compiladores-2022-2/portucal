@@ -4,3 +4,6 @@
 lex.yy.c
 iter
 recur
+simple_table
+table.html
+__pycache__/
