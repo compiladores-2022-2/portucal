@@ -3,8 +3,9 @@
 
 int yylex(void);
 void yyerror (const char *msg);
-extern int yylineno;
+extern int yylineno, yyleng;
 extern char * yytext;
+int collumn_counter = 0;
 
 %}
 
@@ -103,8 +104,8 @@ lista_parametros : parametro
   | parametro ',' lista_parametros
   ;
 
-parametro : ID ':' TIPO
-  | REF ID ':' TIPO
+parametro : ID ':' tipo
+  | REF ID ':' tipo
   ;
 
 dec_tipo : TIPO ID '=' tipo
@@ -289,5 +290,5 @@ int main (void) {
 }
 
 void yyerror (const char *msg) {
-	fprintf (stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
+	fprintf (stderr, "\033[1mLine %d (in column %d):\033[91m %s\033[0m at '%s'\n", yylineno, collumn_counter - yyleng, msg, yytext);
 }

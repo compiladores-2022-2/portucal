@@ -2,7 +2,7 @@
 
 #include "y.tab.h"
 
-int collumn_counter = 0;
+extern int collumn_counter;
 
 #define INC_COL collumn_counter += yyleng
 
