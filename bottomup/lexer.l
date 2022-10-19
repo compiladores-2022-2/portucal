@@ -4,7 +4,7 @@
 
 int collumn_counter = 0;
 
-#dfine INC_COL collumn_counter += yyleng
+#define INC_COL collumn_counter += yyleng
 
 %}
 %option yylineno
