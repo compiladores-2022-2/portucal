@@ -1,6 +1,7 @@
 %{
 
-#include "y.tab.h"
+#include "yacc_types.hpp"
+#include "y.tab.hpp"
 
 extern int collumn_counter;
 
@@ -166,7 +167,7 @@ erro "."
 {cha_dir}     { INC_COL; return '}'; }
 
 {cast}        { INC_COL; return '%'; }
-{id}          { INC_COL; return ID; }
+{id}          { INC_COL; yylval.name = new std::string(yytext); return ID; }
 
 {comentario}  { INC_COL; }
 {quebra_linha} { collumn_counter = 0; }

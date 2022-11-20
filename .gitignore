@@ -7,3 +7,5 @@ recur
 simple_table
 table.html
 __pycache__/
+parser
+tmp/

@@ -1,18 +1,9 @@
-const{
-  z = 4
-}
-
 declrs{
-  var x : int;
-  var y : logico;
-  func fu(a : int) : int { 
-    continue
+  var z : estrutura{
+    x : int
   }
-
 }
 
 bloco{
-  enquanto(z >= 0){
-    z = z - 1
-  }
+  z.x = 3
 }
