@@ -17,7 +17,21 @@ ListaDefinicoes::ListaDefinicoes(Definicao* definicao, ListaDefinicoes* lista)
 :Node({definicao, lista}){}
 
 Definicao::Definicao(VariavelConstante *var_const, Literal* literal)
-:Node({var_const, literal}){}
+:Node({var_const, literal}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    Entry* entry = new Constant(
+      ((Literal*) children[1])->type,
+      ((Literal*) children[1])->value
+    );
+
+    symble_table.add_entry(
+      ((VariavelConstante*) children[0])->id,
+      entry
+    );
+  });
+}
 
 VariavelConstante::VariavelConstante(string* _id):id(_id){}
 
@@ -90,9 +104,18 @@ DecProc::DecProc(string* _id, Bloco* bloco, ListaParametros* lista_parametros)
 :Node({bloco, lista_parametros}), id(_id){
   exec = function<void()> ([&]() -> void
   {
-    exec_children();
+    children[1]->exec();
+
     Entry *entry = new Procedure(((ListaParametros*) children[1])->parameters);
     symble_table.add_entry(id, entry);
+
+    symble_table.add_scope();
+    for(auto [type, name, is_ref] : ((ListaParametros*) children[1])->parameters){
+      Entry *entry = new Variable(type);
+      symble_table.add_entry(name, entry);
+    }
+    children[0]->exec_children();
+    symble_table.pop_scope();
   });
 }
 
@@ -100,12 +123,22 @@ DecFunc::DecFunc(string* _id, Tipo* tipo, Bloco* bloco, ListaParametros* lista_p
 :Node({tipo, bloco, lista_parametros}), id(_id){
   exec = function<void()> ([&]() -> void
   {
-    exec_children();
+    children[0]->exec();
+    children[2]->exec();
+
     Entry *entry = new Function(
       ((Tipo*) children[0])->type,
-      ((ListaParametros*) children[1])->parameters
+      ((ListaParametros*) children[2])->parameters
     );
     symble_table.add_entry(id, entry);
+
+    symble_table.add_scope();
+    for(auto [type, name, is_ref] : ((ListaParametros*) children[2])->parameters){
+      Entry *entry = new Variable(type);
+      symble_table.add_entry(name, entry);
+    }
+    children[1]->exec_children();
+    symble_table.pop_scope();
   });
 }
 
@@ -327,7 +360,7 @@ Node({lista_expr}), id(_id){
     }
 
     if((children[0] == nullptr && parameters.size() > 0) ||
-      (children[0] != nullptr && !are_compatible_types(lista_expr->type_list, parameters))){
+      (children[0] != nullptr && !are_compatible_types(((ListaExpr*) children[0])->type_list, parameters))){
       yyerror("Argument list does not match declared arguments");
       exit(1);
     }
@@ -370,23 +403,66 @@ Controle::Controle(Se* se):Node({se}){}
 
 Controle::Controle(Escolha* escolha):Node({escolha}){}
 
-Se::Se(Expr* expr, Bloco* bloco, Senao* senao):Node({expr, bloco, senao}){}
+Se::Se(Expr* expr, Bloco* bloco, Senao* senao):Node({expr, bloco, senao}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    if(((Expr*) children[0])->type != BOOL_TYPE){
+      yyerror("Expression type in conditional is not boolean");
+      exit(1);
+    }
+  });
+}
 
 Senao::Senao(Bloco *bloco):Node({bloco}){}
 
 Senao::Senao(Se* se):Node({se}){}
 
-Escolha::Escolha(Expr* expr, ListaCasos* lista_casos):Node({expr, lista_casos}){}
+Escolha::Escolha(Expr* expr, ListaCasos* lista_casos):Node({expr, lista_casos}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    auto type = ((Expr*) children[0])->type;
+    auto merge_type = binary_operand(
+      UNION,
+      type,
+      ((ListaCasos*) children[1])->type
+    );
+    if(type != merge_type){
+      yyerror("Cases types do not match guard expression type");
+      exit(1);
+    }
+  });
+}
 
-ListaCasos::ListaCasos(EscolhaPadrao* escolha_padrao):Node({escolha_padrao}){}
+ListaCasos::ListaCasos(EscolhaPadrao* escolha_padrao):Node({escolha_padrao}), type(INT_TYPE){}
 
 ListaCasos::ListaCasos(CasoEscolha* caso_escolha, ListaCasos* lista_casos)
-:Node({caso_escolha, lista_casos}){}
+:Node({caso_escolha, lista_casos}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    type = ((CasoEscolha*) children[0])->type;
+    if(children[1]){
+      type = binary_operand(
+        UNION,
+        type,
+        ((ListaCasos*) children[1])->type
+      );
+    }
+  });
+}
 
 EscolhaPadrao::EscolhaPadrao(Comando* comando):Node({comando}){}
 
 CasoEscolha::CasoEscolha(ExprConst* expr_const, Comando* comando)
-:Node({expr_const, comando}){}
+:Node({expr_const, comando}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    type = ((ExprConst*) children[0])->type;
+  });
+}
 
 Repeticao::Repeticao(Enquanto *enquanto):Node({enquanto}){}
 
@@ -394,12 +470,39 @@ Repeticao::Repeticao(FacaEnquanto *faca_enquanto):Node({faca_enquanto}){}
 
 Repeticao::Repeticao(Para *para):Node({para}){}
 
-Enquanto::Enquanto(Expr* expr, Bloco* bloco):Node({expr, bloco}){}
+Enquanto::Enquanto(Expr* expr, Bloco* bloco):Node({expr, bloco}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    if(((Expr*) children[0])->type != BOOL_TYPE){
+      yyerror("Expression type in loop guard is not boolean");
+      exit(1);
+    }
+  });
+}
 
-FacaEnquanto::FacaEnquanto(Bloco* bloco, Expr* expr):Node({bloco, expr}){}
+FacaEnquanto::FacaEnquanto(Bloco* bloco, Expr* expr):Node({bloco, expr}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    if(((Expr*) children[1])->type != BOOL_TYPE){
+      yyerror("Expression type in loop guard is not boolean");
+      exit(1);
+    }
+  });
+}
 
 Para::Para(Atribuicao* atribuicao1, Expr* expr, Atribuicao* atribuicao2, Bloco* bloco)
-:Node({atribuicao1, expr, atribuicao2, bloco}){}
+:Node({atribuicao1, expr, atribuicao2, bloco}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    if(((Expr*) children[1])->type != BOOL_TYPE){
+      yyerror("Expression type in loop guard is not boolean");
+      exit(1);
+    }
+  });
+}
 
 Retorno::Retorno(Expr* expr):Node({expr}){}
 
@@ -544,6 +647,7 @@ Expr::Expr(Expr* expr1, OP _operand, Expr* expr2)
       ((Expr*) children[0])->type, 
       ((Expr*) children[1])->type
     );
+
     if(type == nullptr){
       yyerror("Uncompatible operands");
       exit(1);
@@ -603,7 +707,7 @@ FolhaExpr::FolhaExpr(Variavel* variavel):Node({variavel}){
   exec = function<void()> ([&]() -> void
   {
     exec_children();
-    type = ((Variable*) children[0])->type;
+    type = ((Variavel*) children[0])->type;
   });
 }
 
@@ -626,7 +730,7 @@ FolhaExpr::FolhaExpr(string* _id, ListaExpr* lista_expr,
     auto parameters = ((Function*) entry)->parameters;
 
     if((children[0] == nullptr && parameters.size() > 0) ||
-      (children[0] != nullptr && !are_compatible_types(lista_expr->type_list, parameters))){
+      (children[0] != nullptr && !are_compatible_types(((ListaExpr*) children[0])->type_list, parameters))){
       yyerror("Argument list does not match declared arguments");
       exit(1);
     }

@@ -1,5 +1,10 @@
 declrs{
     var input : int[10];
+    
+    func tamanho(arr : int[10]) : int{
+        retorne 10
+    };
+
     func buscaBinaria(arr : int[10], x : int) : int{
         declrs{
             var mid, high, low : int
@@ -26,7 +31,7 @@ declrs{
 }
 
 bloco{
-    input = [10, 20, 30, 40, 60, 110, 120, 130, 170];
+    input = [10, 20, 30, 40, 60, 110, 120, 130, 170, 190];
     escreva(buscaBinaria(input, 170));
     escreva(buscaBinaria(input, 23))
 }

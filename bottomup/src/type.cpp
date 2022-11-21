@@ -1,10 +1,25 @@
 #include "type.hpp"
-
+#include <iostream>
 
 Type::Type(Type_t _type_t, Type* _parent, bool _io)
 :Entry(TYPE), supports_io(_io), type_t(_type_t), parent(_parent){}
 
 bool Type::is_io(){ return supports_io; }
+
+Type* casting_result(Type* a, Type *b){
+  
+}
+
+bool are_compatible_types(vector<Type*> args, vector<Parameter> parameters){
+  if(args.size() != parameters.size()) return false;
+
+  for(int i = 0; i < args.size(); ++i){
+    auto type_a = args[i];
+    auto [type_b, name, is_ref] = parameters[i];
+    if(!type_a->are_equiv(type_b)) return false;
+  }
+  return true;
+}
 
 
 ArrayType::ArrayType(Type* _parent, int size)
@@ -21,13 +36,13 @@ bool ArrayType::are_equiv(Type* type){
     if(array_size == ((ArrayType* )type)->array_size){
       switch(parent->type_t){
         case ARRAY:
-          return ((ArrayType*) parent)->are_equiv(type);
+          return ((ArrayType*) parent)->are_equiv(type->parent);
         case STRUCT:
-          return ((StructType*) parent)->are_equiv(type);
+          return ((StructType*) parent)->are_equiv(type->parent);
         case ALIAS:
-          return ((AliasType*) parent)->are_equiv(type);
+          return ((AliasType*) parent)->are_equiv(type->parent);
         case PRIMITIVE:
-          return ((PrimitiveType*) parent)->are_equiv(type);
+          return ((PrimitiveType*) parent)->are_equiv(type->parent);
         default:
           return false;
       }
@@ -165,7 +180,6 @@ Type* int_binary_op(OP operand, Type* t){
       case EXP:
       case UNION:
         return INT_TYPE;
-        break;
       case EQ:
       case DIF:
       case LEQ:
@@ -173,7 +187,6 @@ Type* int_binary_op(OP operand, Type* t){
       case LESS:
       case GREATER:
         return BOOL_TYPE;
-        break;
       default:
         return nullptr;
     }
@@ -185,7 +198,6 @@ Type* int_binary_op(OP operand, Type* t){
       case DIV:
       case UNION:
         return FLUT_TYPE;
-        break;
       case EQ:
       case DIF:
       case LEQ:
@@ -193,7 +205,6 @@ Type* int_binary_op(OP operand, Type* t){
       case LESS:
       case GREATER:
         return BOOL_TYPE;
-        break;
       default:
         return nullptr;
     }
@@ -211,7 +222,6 @@ Type* flut_binary_op(OP operand, Type* t){
       case DIV:
       case UNION:
         return FLUT_TYPE;
-        break;
       case EQ:
       case DIF:
       case LEQ:
@@ -219,7 +229,6 @@ Type* flut_binary_op(OP operand, Type* t){
       case LESS:
       case GREATER:
         return BOOL_TYPE;
-        break;
       default:
         return nullptr;
     }
@@ -231,7 +240,6 @@ Type* flut_binary_op(OP operand, Type* t){
       case DIV:
       case UNION:
         return FLUT_TYPE;
-        break;
       case EQ:
       case DIF:
       case LEQ:
@@ -239,7 +247,6 @@ Type* flut_binary_op(OP operand, Type* t){
       case LESS:
       case GREATER:
         return BOOL_TYPE;
-        break;
       default:
         return nullptr;
     }
@@ -257,10 +264,14 @@ Type* bool_binary_op(OP operand, Type* t){
       case EQ:
       case DIF:
         return BOOL_TYPE;
-        break;
       default:
         return nullptr;
     }
   }
   return nullptr;
 }
+
+Type* FLUT_TYPE;
+Type* BOOL_TYPE;
+Type* INT_TYPE;
+Type* CHAR_TYPE;

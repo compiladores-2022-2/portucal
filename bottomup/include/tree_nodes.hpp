@@ -282,6 +282,7 @@ public:
 
 class ListaCasos : public Node{
 public:
+  Type* type;
   ListaCasos(EscolhaPadrao* escolha_padrao);
   ListaCasos(CasoEscolha* caso_escolha, ListaCasos* lista_casos = nullptr);
 };
@@ -293,6 +294,7 @@ public:
 
 class CasoEscolha : public Node{
 public:
+  Type* type;
   CasoEscolha(ExprConst* expr_const, Comando* comando);
 };
 

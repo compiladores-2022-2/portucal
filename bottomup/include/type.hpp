@@ -81,7 +81,7 @@ extern Type* FLUT_TYPE;
 
 Type* casting_result(Type* a, Type *b);
 
-bool are_compatible_types(vector<Type*> a, vector<Parameter> b);
+bool are_compatible_types(vector<Type*> args, vector<Parameter> parameters);
 
 Type* unary_operand(OP operand, Type *t);
 Type* binary_operand(OP operand, Type *t1, Type *t2);

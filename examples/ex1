@@ -1,9 +1,28 @@
+// DEC TIPO, ESTRUTURA, ARRAY, ATRIBUICAO, NOVO BLOCO
+
 declrs{
-  var z : estrutura{
-    x : int
-  }
+  tipo t2 = estrutura{
+    x, y, z : flut[3]
+  };
+
+  tipo t1 = estrutura{
+    x, y, z : int[3],
+    a : t2[5]
+  };
+
+  var z : t1
 }
 
 bloco{
-  z.x = 3
+  // acesso encadeado de atributos, array
+  z.a[0].y[1] = 3.0;
+
+  // controle de escopo
+  bloco{
+    declrs{
+      // var x : int,
+      var z : int
+    }
+    z = 3
+  }
 }

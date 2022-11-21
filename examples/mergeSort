@@ -1,4 +1,14 @@
 declrs{
+    func troca(arr : int[10], i : int, j : int) : int[10]{
+        declrs{
+            var temp : int
+        }
+        temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+        retorne arr
+    };
+
     proc wmerge(arr: int[10], i : int, m : int, j : int, n : int, w : int){
         enquanto(i < m e j < n){
             se(arr[i] < arr[j]){
@@ -12,32 +22,6 @@ declrs{
         };
         enquanto(j < n){
             troca(arr, w + 1, j + 1)
-        }
-    };
-
-    func troca(arr : int[10], i : int, j : int) : int[10]{
-        declrs{
-            var temp : int
-        }
-        temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-        retorne arr
-    };
-
-    proc wsort(arr: int[10], l : int, u : int, w : int){
-        declrs{
-            var m : int
-        }
-        se(u - l > 1){
-            m = l + (u - l)/2;
-            imsort(arr, l, m);
-            imsort(arr, m, u);
-            wmerge(arr, l, m, m, u, w)
-        } senao{
-            enquanto(l < u){
-                troca(arr, l + 1, w + 1)
-            }
         }
     };
 
@@ -59,6 +43,22 @@ declrs{
                 para (m = n; m < u e arr[m] < arr[m - 1]; m = m + 1){
                     troca(arr, m, m - 1)
                 }
+            }
+        }
+    };
+
+    proc wsort(arr: int[10], l : int, u : int, w : int){
+        declrs{
+            var m : int
+        }
+        se(u - l > 1){
+            m = l + (u - l)/2;
+            imsort(arr, l, m);
+            imsort(arr, m, u);
+            wmerge(arr, l, m, m, u, w)
+        } senao{
+            enquanto(l < u){
+                troca(arr, l + 1, w + 1)
             }
         }
     }

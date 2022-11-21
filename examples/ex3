@@ -1,18 +1,61 @@
-const{
-  z = 4
-}
+// DEFINICOES, LOOPS
+
+// const{
+// z = 4
+// }
 
 declrs{
-  var x : int;
-  var y : logico;
-  funque fu(a : int) : int { {
-    continue
-  }
-
+  // nome de constante ja sendo usado
+  var z : int
 }
 
 bloco{
+  // condicional de estruturas de controle com tipos booleanos
+  // enquanto(z + 0){
   enquanto(z >= 0){
     z = z - 1
-  }
+  };
+
+  faca{
+    declrs{
+      var x : int
+    }
+    z = x + z
+  }enquanto(z >= 0);
+
+  bloco{
+    declrs{ var i : int }
+    para(i = 0; i <= 10; i = i + 1){
+      declrs{ var x : int }
+      leia(x);
+      escreva(i, x)
+    }
+  };
+
+
+  // se(z == 'a'){
+  se(z == z){
+    escreva(z)
+  }senao{
+    escreva(-z)
+  };
+
+  escolha(z + 3){
+    caso 1: bloco{
+      escreva(1);
+      leia(z)
+    };
+    // caso com tipo diferente do tipo da expressao
+    // caso 'a': bloco{
+    //   escreva('i')
+    // };
+    caso 2: bloco{
+      escreva('i')
+    };
+    padrao: escreva(3)
+  };
+  
+
+  // nao trata ainda continue fore de loop
+  continue
 }

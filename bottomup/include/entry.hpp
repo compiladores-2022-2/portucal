@@ -62,8 +62,6 @@ public:
   Entry(FUNCTION), type(t), parameters(_parameters){}
 };
 
-
-
 class Procedure : public Entry{
 public:
   vector<Parameter> parameters;
