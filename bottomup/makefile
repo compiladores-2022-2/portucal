@@ -11,13 +11,13 @@ input_lexer = lexer.l
 
 lexico = $(tmpdir)lex.yy.cpp
 yacc = $(tmpdir)y.tab.cpp
-
+objs = $(tmpdir)tree_nodes.o $(tmpdir)entry.o $(tmpdir)type.o $(tmpdir)main.o $(tmpdir)symble_table.o
 
 CFLAGS = -lm -I$(incdir)
 # CFLAGS = -I$(incdir) -fsanitize=address,undefined -fno-omit-frame-pointer -g -Wall -Wshadow -Wno-unused-result -Wno-sign-compare -Wno-char-subscripts #-fuse-ld=gold
 
-all: $(lexico) $(yacc) 
-	g++ $(lexico) $(yacc) $(srcdir)tree_nodes.cpp $(srcdir)entry.cpp $(srcdir)main.cpp $(srcdir)symble_table.cpp  $(CFLAGS) -o parser
+all: $(lexico) $(yacc) tree_nodes.o entry.o type.o main.o symble_table.o
+	g++ $(lexico) $(yacc) $(objs) $(CFLAGS) -o parser
 
 $(lexico): $(input_lexer)
 	mkdir -p $(tmpdir)
@@ -26,3 +26,6 @@ $(lexico): $(input_lexer)
 $(yacc): $(input_grammar)
 	mkdir -p $(tmpdir)
 	yacc -d $(input_grammar) -o $(yacc)
+
+%.o: $(srcdir)%.cpp
+	g++ -c $< -o $(tmpdir)$@ $(CFLAGS)

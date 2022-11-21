@@ -47,9 +47,6 @@ public:
   
   // create type estrutura
   Type* create_type(vector<pair<Type*, string*>> attr_list);
-
-  // alias de tipo
-  void create_type_alias(string *name, Type* type);
 };
 
 extern SymbleTable symble_table;

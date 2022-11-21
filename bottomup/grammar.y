@@ -102,14 +102,14 @@ definicoes :                                                      { $$ = new Def
   | CONST '{' lista_definicoes '}'                                { $$ = new Definicoes($3); }
   ;
 
-lista_definicoes : definicao                                      {  }
-  | definicao ';' lista_definicoes                                {  }
+lista_definicoes : definicao                                      {$$ = new ListaDefinicoes($1);}
+  | definicao ';' lista_definicoes                                {$$ = new ListaDefinicoes($1, $3); }
   ;
 
-definicao : variavel_constante '=' literal
+definicao : variavel_constante '=' literal                {$$ = new Definicao($1, $3);}
   ;
 
-variavel_constante : ID
+variavel_constante : ID                                    {$$ = new VariavelConstante($1);}
   ;
 
 declaracoes :                                             {$$ = new Declaracoes(); }
@@ -143,20 +143,20 @@ lista_id_vars : ID                                        {$$ = new ListaIdVars(
   | ID ',' lista_id_vars                                  {$$ = new ListaIdVars($1, $3); }
   ;
 
-dec_proc : PROC ID '(' ')' bloco
-  | PROC ID '('lista_parametros ')' bloco
+dec_proc : PROC ID '(' ')' bloco                          {$$ = new DecProc($2, $5, nullptr);}
+  | PROC ID '('lista_parametros ')' bloco                 {$$ = new DecProc($2, $6, $4);}
   ;
 
-dec_func : FUNC ID '(' ')' ':' tipo bloco
-  | FUNC ID '(' lista_parametros ')' ':' tipo bloco
+dec_func : FUNC ID '(' ')' ':' tipo bloco                 {$$ = new DecFunc($2, $6, $7, nullptr);}
+  | FUNC ID '(' lista_parametros ')' ':' tipo bloco       {$$ = new DecFunc($2, $7, $8, $4);}
   ;
 
-lista_parametros : parametro
-  | parametro ',' lista_parametros
+lista_parametros : parametro                              {$$ = new ListaParametros($1);}
+  | parametro ',' lista_parametros                        {$$ = new ListaParametros($1, $3);}
   ;
 
-parametro : ID ':' tipo
-  | REF ID ':' tipo
+parametro : ID ':' tipo                                   {$$ = new Parametro($1, $3, false);}
+  | REF ID ':' tipo                                       {$$ = new Parametro($2, $4, true);}
   ;
 
 dec_tipo : TIPO ID '=' tipo                               {$$ = new DecTipo($2, $4); }
@@ -207,48 +207,48 @@ lista_expr : expr                                       {$$ = new ListaExpr($1);
   | expr ',' lista_expr                                 {$$ = new ListaExpr($1, $3);}
   ;
 
-controle : se
-  | escolha
+controle : se                                           {$$ = new Controle($1);}
+  | escolha                                             {$$ = new Controle($1);}
   ;
 
-se : SE '(' expr ')' bloco senao
-  | SE '(' expr ')' bloco
+se : SE '(' expr ')' bloco senao                        {$$ = new Se($3, $5, $6);}
+  | SE '(' expr ')' bloco                               {$$ = new Se($3, $5);} 
   ;
 
-senao : SENAO bloco
-  | SENAO se
+senao : SENAO bloco                                     {$$ = new Senao($2);}
+  | SENAO se                                            {$$ = new Senao($2);}
   ;
 
-escolha : ESCOLHA '(' expr ')' '{' lista_casos '}'
+escolha : ESCOLHA '(' expr ')' '{' lista_casos '}'      {$$ = new Escolha($3, $6);}
   ;
 
-lista_casos : escolha_padrao
-  | caso_escolha
-  | caso_escolha ';' lista_casos
+lista_casos : escolha_padrao                            {$$ = new ListaCasos($1);}
+  | caso_escolha                                        {$$ = new ListaCasos($1);}
+  | caso_escolha ';' lista_casos                        {$$ = new ListaCasos($1, $3);}
   ;
 
-escolha_padrao : PADRAO ':' comando
+escolha_padrao : PADRAO ':' comando                     {$$ = new EscolhaPadrao($3);}
   ;
 
-caso_escolha : CASO expr_const ':' comando
+caso_escolha : CASO expr_const ':' comando              {$$ = new CasoEscolha($2, $4);}
   ;
 
-repeticao : enquanto
-  | faca_enquanto
-  | para
+repeticao : enquanto                                    {$$ = new Repeticao($1);}
+  | faca_enquanto                                       {$$ = new Repeticao($1);}
+  | para                                                {$$ = new Repeticao($1);}
   ;
 
-enquanto : ENQUANTO '(' expr ')' bloco
+enquanto : ENQUANTO '(' expr ')' bloco                  {$$ = new Enquanto($3, $5);}
   ;
 
-faca_enquanto : FACA bloco ENQUANTO '(' expr ')'
+faca_enquanto : FACA bloco ENQUANTO '(' expr ')'        {$$ = new FacaEnquanto($2, $5);}
   ;
 
-para : PARA '(' atribuicao ';' expr ';' atribuicao ')' bloco
+para : PARA '(' atribuicao ';' expr ';' atribuicao ')' bloco {$$ = new Para($3, $5, $7, $9);}
   ;
 
-retorno : RETORNE 
-  | RETORNE expr
+retorno : RETORNE                                     {$$ = new Retorno();}
+  | RETORNE expr                                      {$$ = new Retorno($2);}
   ;
 
 variavel : ID                                         {$$ = new Variavel($1);}
@@ -263,15 +263,15 @@ modificador_variavel : '.' ID                         {$$ = new ModificadorVaria
   | '[' expr ']'                                      {$$ = new ModificadorVariavel($2); }
   ;
 
-literal : literal_logico                              {$$ = new Literal(BOOL_TYPE);}
-  | LIT_INT                                           {$$ = new Literal(INT_TYPE);}
-  | LIT_FLUT                                          {$$ = new Literal(FLUT_TYPE);}
-  | LIT_CHAR                                          {$$ = new Literal(CHAR_TYPE);}
+literal : literal_logico                              {$$ = new Literal($1);}
+  | LIT_INT                                           {$$ = new Literal(stoi(yytext));}
+  | LIT_FLUT                                          {$$ = new Literal(stof(yytext));}
+  | LIT_CHAR                                          {$$ = new Literal(yytext[1]);}
   | literal_array                                     {$$ = new Literal($1);}
   ;
 
-literal_logico : VERDADEIRO
-  | FALSO
+literal_logico : VERDADEIRO                           {$$ = new LiteralLogico(true);}
+  | FALSO                                             {$$ = new LiteralLogico(false);}
   ;
 
 literal_array : LIT_STRING                            {$$ = new LiteralArray();}
@@ -312,29 +312,29 @@ folha_expr : literal                                  {$$ = new FolhaExpr($1);}
   | ID '(' lista_expr ')' lista_modificadores         {$$ = new FolhaExpr($1, $3, $5); }
   ;
 
-expr_const : expr_const '+' expr_const                    
-  | expr_const '-' expr_const
-  | expr_const '*' expr_const
-  | expr_const MOD expr_const
-  | expr_const '/' expr_const
-  | expr_const '^' expr_const
-  | expr_const IGUAL_IGUAL expr_const
-  | expr_const DIFERENTE expr_const
-  | expr_const MENOR_IGUAL expr_const
-  | expr_const MAIOR_IGUAL expr_const
-  | expr_const '<' expr_const
-  | expr_const '>' expr_const
-  | expr_const 'e' expr_const
-  | expr_const OU expr_const
-  | '+' expr_const %prec UPLUS
-  | '-' expr_const %prec UMINUS
-  | '!' expr_const
-  | '%' tipo '%' expr_const %prec CASTING
-  | '(' expr_const ')'
-  | folha_expr_const
+expr_const : expr_const '+' expr_const                                  {$$ = new ExprConst($1, PLUS, $3);}
+  | expr_const '-' expr_const                                     {$$ = new ExprConst($1, MINUS, $3);}
+  | expr_const '*' expr_const                                     {$$ = new ExprConst($1, TIMES, $3);}
+  | expr_const MOD expr_const                                     {$$ = new ExprConst($1, MODOP, $3);}
+  | expr_const '/' expr_const                                     {$$ = new ExprConst($1, DIV, $3);}
+  | expr_const '^' expr_const                                     {$$ = new ExprConst($1, EXP, $3);}
+  | expr_const IGUAL_IGUAL expr_const                             {$$ = new ExprConst($1, EQ, $3);}
+  | expr_const DIFERENTE expr_const                               {$$ = new ExprConst($1, DIF, $3);}
+  | expr_const MENOR_IGUAL expr_const                             {$$ = new ExprConst($1, LEQ, $3);}
+  | expr_const MAIOR_IGUAL expr_const                             {$$ = new ExprConst($1, GEQ, $3);}
+  | expr_const '<' expr_const                                     {$$ = new ExprConst($1, LESS, $3);}
+  | expr_const '>' expr_const                                     {$$ = new ExprConst($1, GREATER, $3);}
+  | expr_const 'e' expr_const                                     {$$ = new ExprConst($1, AND, $3);}
+  | expr_const OU expr_const                                      {$$ = new ExprConst($1, OR, $3);}
+  | '+' expr_const %prec UPLUS                              {$$ = new ExprConst(UNARY_PLUS, $2);}
+  | '-' expr_const %prec UMINUS                             {$$ = new ExprConst(UNARY_MINUS, $2);}
+  | '!' expr_const                                          {$$ = new ExprConst(NOT, $2);}
+  | '%' tipo '%' expr_const %prec CASTING                   {$$ = new ExprConst($2, $4);}
+  | '(' expr_const ')'                                      {$$ = new ExprConst($2);}
+  | folha_expr_const                                        {$$ = new ExprConst($1);}
   ;
 
-folha_expr_const : literal
+folha_expr_const : literal                                  {$$ = new FolhaExprConst($1);}
   ;
 
 %% /* Fim da segunda seção */

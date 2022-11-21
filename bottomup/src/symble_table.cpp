@@ -58,17 +58,4 @@ void SymbleTable::add_entry(string *name, Entry* entry){
 //   return (Type*) entry;
 // }
 
-// alias de tipo
-void SymbleTable::create_type_alias(string *name, Type* type){
-
-  Entry* entry;
-  if(type->parent != nullptr){
-    entry = new Type(type->array_sizes, type->parent);
-  }else{
-    entry = new Type({}, type);
-  }
-  
-  add_entry(name, entry);
-}
-
 extern SymbleTable symble_table;

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "entry.hpp"
+#include "type.hpp"
 
 #define ALPHA_SIZE 256
 

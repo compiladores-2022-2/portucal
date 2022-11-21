@@ -1,7 +1,7 @@
 #ifndef TREE_NODES_H
 #define TREE_NODES_H
 
-#include<string>
+#include <string>
 #include <functional>
 #include "symble_table.hpp"
 #include "internal_enums.hpp"
@@ -89,8 +89,7 @@ public:
 
 class ListaDefinicoes : public Node{
 public:
-  ListaDefinicoes(Definicao* definicao);
-  ListaDefinicoes(Definicao* definicao, ListaDefinicoes* lista);
+  ListaDefinicoes(Definicao* definicao, ListaDefinicoes* lista = nullptr);
 };
 
 class Definicao : public Node{
@@ -100,7 +99,8 @@ public:
 
 class VariavelConstante : public Node{
 public:
-  VariavelConstante(string* id);
+  string* id;
+  VariavelConstante(string* _id);
 };
 
 class Declaracoes : public Node{
@@ -133,7 +133,6 @@ public:
   Bloco(Declaracoes* declaracoes, ListaComandos* lista_comandos);
 };
 
-
 class ListaComandos : public Node{
 public:
   ListaComandos(Comando* comando, ListaComandos* lista_comandos = nullptr);
@@ -157,24 +156,28 @@ public:
 
 class DecProc : public Node{
 public:
-  DecProc(Bloco* bloco);
-  DecProc(ListaParametros* lista_parametros, Bloco* bloco);
+  string* id;
+  DecProc(string* _id, Bloco* bloco, ListaParametros* lista_parametros = nullptr);
 };
 
 class DecFunc : public Node{
 public:
-  DecFunc(Bloco* bloco);
-  DecFunc(ListaParametros* lista_parametros, Bloco* bloco);
+  string* id;
+  DecFunc(string *_id, Tipo* tipo, Bloco* bloco, ListaParametros* lista_parametros = nullptr);
 };
 
 class ListaParametros : public Node{
 public:
-  ListaParametros(Parametro* parametro, ListaParametros* lista_parametros);
+  vector<Parameter> parameters;
+  ListaParametros(Parametro* parametro, ListaParametros* lista_parametros = nullptr);
 };
 
 class Parametro : public Node{
 public:
-  Parametro(string* id, Tipo* tipo);
+  bool is_ref;
+  string *id;
+  Parameter parameter;
+  Parametro(string* _id, Tipo* tipo, bool _is_ref);
 };
 
 class DecTipo : public Node{
@@ -199,7 +202,6 @@ public:
 
   TipoSimples(PRIMITIVE_TYPE );
 };
-
 
 class ColchetesOuVazio : public Node{
 public:
@@ -244,7 +246,6 @@ public:
   Comando(string* _id, ListaExpr* lista_expr = nullptr);
 };
 
-
 class Atribuicao : public Node{
 public:
   Atribuicao(Variavel* variavel, Expr* expr);
@@ -259,64 +260,67 @@ public:
 
 class Controle : public Node{
 public:
-
+  Controle(Se *se);
+  Controle(Escolha* escolha);
 };
 
 class Se : public Node{
 public:
-
+  Se(Expr* expr, Bloco* bloco, Senao* senao = nullptr);
 };
 
 class Senao : public Node{
 public:
-
+  Senao(Bloco *bloco);
+  Senao(Se* se);
 };
 
 class Escolha : public Node{
 public:
-
+  Escolha(Expr* expr, ListaCasos* lista_casos);
 };
-
 
 class ListaCasos : public Node{
 public:
-
+  ListaCasos(EscolhaPadrao* escolha_padrao);
+  ListaCasos(CasoEscolha* caso_escolha, ListaCasos* lista_casos = nullptr);
 };
 
 class EscolhaPadrao : public Node{
 public:
-
+  EscolhaPadrao(Comando* comando);
 };
 
 class CasoEscolha : public Node{
 public:
-
+  CasoEscolha(ExprConst* expr_const, Comando* comando);
 };
 
 class Repeticao : public Node{
 public:
-
+  Repeticao(Enquanto *enquanto);
+  Repeticao(FacaEnquanto *faca_enquanto);
+  Repeticao(Para *para);
 };
 
 class Enquanto : public Node{
 public:
-
+  Enquanto(Expr* expr, Bloco* bloco);
 };
-
 
 class FacaEnquanto : public Node{
 public:
-
+  FacaEnquanto(Bloco* bloco, Expr* expr);
 };
 
 class Para : public Node{
 public:
-
+  Para(Atribuicao* atribuicao1, Expr* expr, Atribuicao* atribuicao2, Bloco* bloco);
 };
 
 class Retorno : public Node{
 public:
-
+  Retorno(Expr* expr = nullptr);
 };
 
 class Variavel : public Node{
@@ -334,7 +338,6 @@ public:
   ListaModificadores(ModificadorVariavel* modificador, ListaModificadores* lista_mod = nullptr);
 };
 
-
 class ModificadorVariavel : public Node{
 public:
   Modifier modifier;
@@ -346,15 +349,19 @@ public:
 class Literal : public Node{
 public:
   Type *type;
+  Value value;
 
-  Literal(Type *_type);
+  Literal(LiteralLogico* literal_logico);
+  Literal(int int_val);
+  Literal(float flut_val);
+  Literal(char carac_val);
   Literal(LiteralArray *literal_array);
-
 };
 
 class LiteralLogico : public Node{
 public:
-
+  bool value;
+  LiteralLogico(bool _value);
 };
 
 class LiteralArray : public Node{
@@ -368,18 +375,15 @@ class ListaLiterais : public Node{
 public:
   Type* type;
   int size;
-
   ListaLiterais(Literal* literal, ListaLiterais* lista_literais = nullptr);
-
 };
-
 
 class Expr : public Node{
 public:
   Type *type;
   OP operand;
 
-  Expr(Expr* expr1, OP operand, Expr* expr2);
+  Expr(Expr* expr1, OP _operand, Expr* expr2);
   Expr(OP operand, Expr* expr);
   Expr(Tipo *_t, Expr* expr);
   Expr(Expr* expr);
@@ -403,12 +407,22 @@ public:
 class ExprConst : public Node{
 public:
   Type* type;
+  OP operand;
+  Value value;
 
+  ExprConst(ExprConst* expr1, OP _operand, ExprConst* expr2);
+  ExprConst(OP operand, ExprConst* expr);
+  ExprConst(Tipo *_t, ExprConst* expr);
+  ExprConst(ExprConst* expr);
+  ExprConst(FolhaExprConst* folha_expr);
 };
 
 class FolhaExprConst : public Node{
 public:
+  Type* type;
+  Value value;
 
+  FolhaExprConst(Literal* literal);
 };
 
 

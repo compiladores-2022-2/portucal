@@ -7,12 +7,9 @@ using namespace std;
 void yyparse();
 
 int main(){
-  CHAR_TYPE = new Type({}, nullptr, true);
-  BOOL_TYPE = new Type({}, nullptr, true);
-  INT_TYPE = new Type({}, nullptr, true);
-  FLUT_TYPE = new Type({}, nullptr, true);
-
-  
-
+  CHAR_TYPE = new PrimitiveType();
+  BOOL_TYPE = new PrimitiveType();
+  INT_TYPE = new PrimitiveType();
+  FLUT_TYPE = new PrimitiveType();
 	yyparse();
 }
