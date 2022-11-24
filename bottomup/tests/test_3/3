@@ -1,0 +1,11 @@
+// DEFINICOES, LOOPS
+
+declrs{
+  var z : int
+}
+
+bloco{
+  enquanto(z + 0){
+    z = z - 1
+  }
+}

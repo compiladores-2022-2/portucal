@@ -340,5 +340,5 @@ folha_expr_const : literal                                  {$$ = new FolhaExprC
 %% /* Fim da segunda seção */
 
 void yyerror (const char *msg) {
-	fprintf (stderr, "\033[1mLine %d (in column %d):\033[91m %s\033[0m\n", yylineno, collumn_counter - yyleng, msg);
+	fprintf (stderr, "\033[1m\033[91m%s\033[0m\n", msg);
 }

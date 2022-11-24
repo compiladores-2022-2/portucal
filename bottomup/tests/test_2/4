@@ -1,0 +1,14 @@
+// DEC FUNC, DEC PROC, CHAMADA DE FUNCAO/PROC
+
+declrs{
+  proc foo(x : int, y : int){ 
+    declrs{ var d : int }
+    se(x == 0){ retorne y };
+    d = foo(x, x mod y)
+  };
+  var x : int
+}
+
+bloco{
+  x = foo2(1, 2)
+}

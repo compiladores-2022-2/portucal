@@ -1,0 +1,19 @@
+// DEFINICOES, LOOPS
+
+declrs{
+  // nome de constante ja sendo usado
+  var z : int
+}
+
+bloco{
+  bloco{
+    declrs{ var i : int }
+    para(i = 0; i <= 10; i = i + 1){
+      declrs{ var x : int }
+      leia(x);
+      escreva(i, x)
+    }
+  };
+
+  i = 3
+}

@@ -1,0 +1,33 @@
+// DEC FUNC, DEC PROC, CHAMADA DE FUNCAO/PROC
+
+declrs{
+  // nao consegue tratar referencias ainda
+  func foo(ref x : int, y : int) : int{ 
+    declrs{ var d : int }
+    se(x == 0){ retorne y };
+    // funcao recursiva
+    d = foo(x, x mod y);
+    retorne d
+  };
+
+  // nao consegue checar tipo de retorno
+  proc foo2(x : int, y : estrutura{ a, b : int}){ 
+    retorne x + y.a
+  };
+
+  var x : int
+}
+
+bloco{
+  foo(1, 2);
+
+  bloco{
+    declrs{
+      var arg : estrutura{
+        a, b, c : int
+      };
+      var tmp : int
+    }
+    foo2(1, arg)
+  }
+}

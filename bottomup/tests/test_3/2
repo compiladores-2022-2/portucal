@@ -1,0 +1,17 @@
+// DEFINICOES, LOOPS
+
+const{
+  z = 4
+}
+
+declrs{
+  // nome de constante ja sendo usado
+  var z : int
+}
+
+bloco{
+  // condicional de estruturas de controle com tipos booleanos
+  enquanto(z >= 0){
+    z = z - 1
+  }
+}

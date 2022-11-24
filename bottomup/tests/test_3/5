@@ -1,0 +1,13 @@
+// DEFINICOES, LOOPS
+
+declrs{
+  var z : int
+}
+
+bloco{
+  se(z == 'a'){
+    escreva(z)
+  }senao{
+    escreva(-z)
+  }
+}

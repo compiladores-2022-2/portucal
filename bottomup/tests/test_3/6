@@ -1,0 +1,21 @@
+// DEFINICOES, LOOPS
+
+declrs{
+  var z : int
+}
+
+bloco{
+   escolha(z + 3){
+    caso 1: bloco{
+      escreva(1);
+      leia(z)
+    };
+    caso 'a': bloco{
+      escreva('i')
+    };
+    caso 2: bloco{
+      escreva('i')
+    };
+    padrao: escreva(3)
+  }
+}
