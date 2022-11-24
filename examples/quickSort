@@ -16,8 +16,8 @@ declrs{
         i = low - 1;
         para(j = low; j <= high - 1; j = j + 1){
             se(arr[j] < pivo){
-                i = i + 1;
-                escreva(troca(arr, i, j))
+                i = i + 1
+                // escreva(troca(arr, i, j))
             }
         };
         retorne i + 1
