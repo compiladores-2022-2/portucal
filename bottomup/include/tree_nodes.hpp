@@ -64,6 +64,8 @@ class Node{
 public:
   vector<Node*> children;
   function<void(void)> exec;
+  string code;
+  int next;
 
   Node(vector<Node*> _children = {})
   :children(_children), exec([&](){
@@ -384,6 +386,8 @@ class Expr : public Node{
 public:
   Type *type;
   OP operand;
+  int l_true = -1, l_false = -1;
+  string var = "";
 
   Expr(Expr* expr1, OP _operand, Expr* expr2);
   Expr(OP operand, Expr* expr);
@@ -396,6 +400,7 @@ class FolhaExpr : public Node{
 public:
   Type* type;
   string *id;
+  string var;
 
   FolhaExpr(Literal* literal);
   FolhaExpr(Variavel* variavel);

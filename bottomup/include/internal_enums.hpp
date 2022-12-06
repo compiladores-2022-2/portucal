@@ -1,6 +1,9 @@
 #ifndef OPERANDS_H
 #define OPERANDS_H
 
+#include <string>
+using namespace std;
+
 enum OP{
   UNION,
   PLUS,

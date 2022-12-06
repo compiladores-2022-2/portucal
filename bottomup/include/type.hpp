@@ -15,8 +15,9 @@ public:
   bool supports_io;
   Type_t type_t;
   Type* parent;
+  string name;
 
-  Type(Type_t _type_t, Type* _parent, bool _io);
+  Type(Type_t _type_t, Type* _parent, bool _io, string _name);
   virtual ~Type();
 
   bool is_io();
@@ -56,7 +57,7 @@ public:
 
 class AliasType : public Type{
 public:
-  AliasType(Type* _parent);
+  AliasType(Type* _parent, string _name);
   ~AliasType();
 
   bool are_equiv(Type* type);
@@ -66,7 +67,7 @@ public:
 
 class PrimitiveType : public Type{
 public:
-  PrimitiveType();
+  PrimitiveType(string _name);
   ~PrimitiveType();
 
   bool are_equiv(Type* type);
@@ -94,11 +95,7 @@ Type* flut_binary_op(OP operand, Type* t2);
 struct Modifier{
   bool is_idx;
   string* name;
-
-  Modifier(string* id): is_idx(false), name(id){}
-
-  // se nao tem nada, assumo que eh indice numerico
-  Modifier(): is_idx(true), name(nullptr){}
+  Modifier(string* id = nullptr, bool _is_idx = false): is_idx(_is_idx), name(id){}
 };
 
 Type* modify_type(Type* type, vector<Modifier> modifiers);

@@ -11,7 +11,7 @@ input_lexer = lexer.l
 
 lexico = $(tmpdir)lex.yy.cpp
 yacc = $(tmpdir)y.tab.cpp
-objs = $(tmpdir)tree_nodes.o $(tmpdir)type.o $(tmpdir)main.o $(tmpdir)symble_table.o
+objs = $(tmpdir)tree_nodes.o $(tmpdir)type.o $(tmpdir)main.o $(tmpdir)symble_table.o 
 
 CFLAGS = -lm -I$(incdir)
 # CFLAGS = -I$(incdir) -fsanitize=address,undefined -fno-omit-frame-pointer -g -Wall -Wshadow -Wno-unused-result -Wno-sign-compare -Wno-char-subscripts #-fuse-ld=gold

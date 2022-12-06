@@ -1,8 +1,8 @@
 #include "type.hpp"
 #include <iostream>
 
-Type::Type(Type_t _type_t, Type* _parent, bool _io)
-:Entry(TYPE), supports_io(_io), type_t(_type_t), parent(_parent){}
+Type::Type(Type_t _type_t, Type* _parent, bool _io, string _name)
+:Entry(TYPE), supports_io(_io), type_t(_type_t), parent(_parent), name(_name){}
 
 bool Type::is_io(){ return supports_io; }
 
@@ -23,7 +23,12 @@ bool are_compatible_types(vector<Type*> args, vector<Parameter> parameters){
 
 
 ArrayType::ArrayType(Type* _parent, int size)
-:Type(ARRAY, _parent, false), array_size(size){}
+:Type(
+  ARRAY, 
+  _parent, 
+  false, 
+  _parent->name + "[" + to_string(size) + "]"
+), array_size(size){}
 
 Type::~Type() = default;
 ArrayType::~ArrayType() = default;
@@ -54,7 +59,13 @@ Type* ArrayType::access_array(){ return parent; }
 Type* ArrayType::access_attr(string *attr_name){ return nullptr; }
 
 StructType::StructType(vector<pair<Type*, string*>> _attrs)
-:Type(STRUCT, nullptr, false), attrs(_attrs){}
+:Type(STRUCT, nullptr, false, ""), attrs(_attrs){
+  name = "struct{\n";
+  for(auto [typ, attr_name] : attrs){
+    name += typ->name + " " + *attr_name + ";\n";
+  }
+  name += "}";
+}
 
 bool StructType::are_equiv(Type* type){
   if(type->type_t == STRUCT){
@@ -93,8 +104,13 @@ Type* StructType::access_attr(string *attr_name){
   return nullptr;
 }
 
-AliasType::AliasType(Type* _parent)
-:Type(ALIAS, _parent, _parent->is_io()){}
+AliasType::AliasType(Type* _parent, string _name)
+:Type(
+  ALIAS, 
+  _parent, 
+  _parent->is_io(),
+  "_" + _name
+){}
 
 bool AliasType::are_equiv(Type* type){
   if(type->type_t == ALIAS){
@@ -107,7 +123,8 @@ Type* AliasType::access_attr(string *attr_name){
   return parent->access_attr(attr_name); 
 }
 
-PrimitiveType::PrimitiveType():Type(PRIMITIVE, nullptr, true){}
+PrimitiveType::PrimitiveType(string _name):
+Type(PRIMITIVE, nullptr, true, _name){}
 
 bool PrimitiveType::are_equiv(Type* type){
   if(type->type_t == PRIMITIVE){
