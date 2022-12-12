@@ -1,7 +1,7 @@
 #include "type.hpp"
 #include <iostream>
 
-Type::Type(Type_t _type_t, Type* _parent, bool _io, string _name)
+Type::Type(Type_t _type_t, Type* _parent, bool _io, pair<string,string> _name)
 :Entry(TYPE), supports_io(_io), type_t(_type_t), parent(_parent), name(_name){}
 
 bool Type::is_io(){ return supports_io; }
@@ -27,7 +27,10 @@ ArrayType::ArrayType(Type* _parent, int size)
   ARRAY, 
   _parent, 
   false, 
-  _parent->name + "[" + to_string(size) + "]"
+  {
+    _parent->name.first,
+    _parent->name.second + "[" + to_string(size) + "]"
+  }
 ), array_size(size){}
 
 Type::~Type() = default;
@@ -59,12 +62,12 @@ Type* ArrayType::access_array(){ return parent; }
 Type* ArrayType::access_attr(string *attr_name){ return nullptr; }
 
 StructType::StructType(vector<pair<Type*, string*>> _attrs)
-:Type(STRUCT, nullptr, false, ""), attrs(_attrs){
-  name = "struct{\n";
+:Type(STRUCT, nullptr, false, {"", ""}), attrs(_attrs){
+  name.first = "struct{\n";
   for(auto [typ, attr_name] : attrs){
-    name += typ->name + " " + *attr_name + ";\n";
+    name.first += typ->name.first + " " + *attr_name + typ->name.second + ";\n";
   }
-  name += "}";
+  name.first += "}";
 }
 
 bool StructType::are_equiv(Type* type){
@@ -109,7 +112,7 @@ AliasType::AliasType(Type* _parent, string _name)
   ALIAS, 
   _parent, 
   _parent->is_io(),
-  "_" + _name
+  {"_" + _name, ""}  
 ){}
 
 bool AliasType::are_equiv(Type* type){
@@ -124,7 +127,7 @@ Type* AliasType::access_attr(string *attr_name){
 }
 
 PrimitiveType::PrimitiveType(string _name):
-Type(PRIMITIVE, nullptr, true, _name){}
+Type(PRIMITIVE, nullptr, true, {_name, ""}){}
 
 bool PrimitiveType::are_equiv(Type* type){
   if(type->type_t == PRIMITIVE){
@@ -143,8 +146,6 @@ Type* binary_operand(OP operand, Type *t1, Type *t2){
     return bool_binary_op(operand, t2);
   }else if(t1 == FLUT_TYPE){
     return flut_binary_op(operand, t2);
-  }else if(t1 == CHAR_TYPE){
-    return nullptr;
   }else if(operand == UNION){
     if(t1->are_equiv(t2)) return t1;
   }

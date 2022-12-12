@@ -9,7 +9,9 @@ using namespace std;
 
 namespace code_gen{
 
-int next_label = 0;
+stack<pair<int,int>> loop_goto;
+
+int next_label = 1;
 int get_next_label(){
   return next_label++;
 }
@@ -21,28 +23,27 @@ string gen_label(int label_id){
 string concat_code(const vector<string> strs){
   string code = "";
   for(auto str : strs) code += str;
-  std::cout << "#####\n"<< code << "#####\n";
   return code;
 }
 
-vector<string> var_types;
+vector<pair<string, string>> var_types;
 int next_var_id = 0;
-string gen_var(string type){
+string gen_var(pair<string,string> type){
   var_types.push_back(type);
   return "t" + to_string(next_var_id++);
 }
 
 string print_vars(){
-  std::map<string,vector<int>> type2ids;
+  std::map<pair<string,string>,vector<int>> type2ids;
   for(int i = 0; i < next_var_id; ++i){
     type2ids[var_types[i]].push_back(i);
   }
 
   string code = "";
   for(auto &[type, ids] : type2ids){
-    string line = type;
+    string line = type.first;
     for(int i = 0; i < ids.size(); ++i){
-      line += " t" + to_string(ids[i]);
+      line += " t" + to_string(ids[i]) + type.second;
       if(i + 1 < ids.size()) line += ",";
     }
     line += ";";

@@ -15,9 +15,9 @@ public:
   bool supports_io;
   Type_t type_t;
   Type* parent;
-  string name;
+  pair<string, string> name;
 
-  Type(Type_t _type_t, Type* _parent, bool _io, string _name);
+  Type(Type_t _type_t, Type* _parent, bool _io, pair<string,string> _name);
   virtual ~Type();
 
   bool is_io();

@@ -1,0 +1,34 @@
+declrs{
+    var V : int[100];
+    var n, i : int;
+    var x : int;
+    var mid, high, low : int
+}
+
+bloco{
+    leia(n);
+    para(i = 0; i < n; i = i + 1){
+        leia(V[i])
+    };
+
+
+    leia(x);
+    high = n;
+    low = 0;
+
+    enquanto(high - low > 1){
+        mid = (low + high) / 2;
+        se(x == V[mid]){
+            escreva(mid, '\n');
+            pare
+        }senao se(x > V[mid]){
+            low = mid + 1
+        }senao{
+            high = mid
+        }
+    };
+
+    se(high - low <= 1){
+        escreva(-1, '\n')
+    }
+}

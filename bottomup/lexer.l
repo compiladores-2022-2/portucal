@@ -20,6 +20,7 @@ lit_int     [-+]?{dig}{dig}*
 lit_char    \'.\'
 lit_string  \".*\"
 
+eol         \'\\n\'
 continue    "continue"
 pare        "pare"
 se          "se"
@@ -96,6 +97,8 @@ erro "."
 {lit_int}     { INC_COL; return LIT_INT; }
 {lit_char}    { INC_COL; return LIT_CHAR; }
 {lit_string}  { INC_COL; return LIT_STRING; }
+
+{eol}    { INC_COL; return EOL; }
 
 {enquanto}    { INC_COL; return ENQUANTO; }
 {faca}        { INC_COL; return FACA; }

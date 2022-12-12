@@ -14,6 +14,7 @@ Programa::Programa(Definicoes* definicoes, Declaracoes* decs, NovoBloco* novo_bl
     exec_children();
     code = code_gen::concat_code({
       "#include<stdio.h>\n\n",
+      "enum{false, true} bool;\n",
       children[0]->code,
       children[1]->code,
       "\n",
@@ -25,12 +26,27 @@ Programa::Programa(Definicoes* definicoes, Declaracoes* decs, NovoBloco* novo_bl
     });
   });
   exec();
+  cout << code;
 }
 
-Definicoes::Definicoes(ListaDefinicoes* lista):Node({lista}){}
+Definicoes::Definicoes(ListaDefinicoes* lista):Node({lista}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    if(children[0]) code = children[0]->code + "\n";
+  });
+}
 
 ListaDefinicoes::ListaDefinicoes(Definicao* definicao, ListaDefinicoes* lista)
-:Node({definicao, lista}){}
+:Node({definicao, lista}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    code = children[0]->code;
+    if(children[1]) 
+      code = code_gen::concat_code({code, children[1]->code});
+  }); 
+}
 
 Definicao::Definicao(VariavelConstante *var_const, Literal* literal)
 :Node({var_const, literal}){
@@ -46,10 +62,16 @@ Definicao::Definicao(VariavelConstante *var_const, Literal* literal)
       ((VariavelConstante*) children[0])->id,
       entry
     );
+
+    code = code_gen::concat_code({
+      "#define ", children[0]->code, " ", children[1]->code, "\n"
+    });
   });
 }
 
-VariavelConstante::VariavelConstante(string* _id):id(_id){}
+VariavelConstante::VariavelConstante(string* _id):id(_id){
+  code = *id;
+}
 
 Declaracoes::Declaracoes(ListaDeclaracoes* lista):Node({lista}){
   exec = function<void()> ([&]() -> void
@@ -131,7 +153,6 @@ Bloco::Bloco(Declaracoes* declaracoes, ListaComandos* lista_comandos)
   });
 }
 
-// S1 [...S...]
 ListaComandos::ListaComandos(Comando* comando, ListaComandos* lista_comandos)
 :Node({comando, lista_comandos}){
   exec = function<void()> ([&]() -> void
@@ -141,7 +162,7 @@ ListaComandos::ListaComandos(Comando* comando, ListaComandos* lista_comandos)
     
     code = code_gen::concat_code({
       children[0]->code,
-      code_gen::gen_label(children[0]->next), ":\n",
+      code_gen::gen_label(children[0]->next), ":;\n",
     });
 
     if(children[1]){
@@ -155,17 +176,19 @@ DecVar::DecVar(ListaIdVars* lista_id_vars, Tipo* tipo)
   exec = function<void()> ([&]() -> void
   {
     exec_children();
+
+
     for(auto id : ((ListaIdVars *) children[0])->id_list){      
       Variable* entry = new Variable(((Tipo *) children[1])->type);
       symble_table.add_entry(id, entry);
     }
 
-    code = code_gen::concat_code({
-      children[1]->code,
-      " ",
-      children[0]->code,
-      ";\n"
-    });
+    code = ((Tipo *) children[1])->type->name.first + " ";
+    for(auto id : ((ListaIdVars *) children[0])->id_list){
+      code += *id + ((Tipo *) children[1])->type->name.second + ", ";
+    }
+    code.pop_back(); code.pop_back();
+    code += ";\n";
   });
 }
 
@@ -270,7 +293,7 @@ DecTipo::DecTipo(string* _id, Tipo* tipo)
 
     // typedef unsigned char BYTE;
     code = code_gen::concat_code({
-      "typedef ", children[0]->code, " ", *id, ";\n"
+      "typedef ", children[0]->code, " _", *id, ";\n"
     });
   });
 }
@@ -441,12 +464,12 @@ DecAtr::DecAtr(ListaIdVars* lista_id_vars, Tipo* tipo)
     type = ((Tipo*) children[1])->type;
     id_list = ((ListaIdVars*) children[0])->id_list;
 
-    code = code_gen::concat_code({
-      children[1]->code,
-      " ",
-      children[0]->code,
-      "\n"
-    });
+    code = ((Tipo *) children[1])->type->name.first + " ";
+    for(auto id : ((ListaIdVars *) children[0])->id_list){
+      code += *id + ((Tipo *) children[1])->type->name.second + ", ";
+    }
+    code.pop_back(); code.pop_back();
+    code += ";\n";
   });
 }
 
@@ -454,9 +477,19 @@ Comando::Comando(COMMAND c):command(c){
   exec = function<void()> ([&]() -> void
   {
     if(command == EPARE){
-      code = "break;\n";
+      if(code_gen::loop_goto.empty()){
+        yyerror("Cannot have break here");
+        exit(1);
+      }
+      int nxt_loop = code_gen::loop_goto.top().second;
+      code = "goto " + code_gen::gen_label(nxt_loop) + ";\n";
     }else{
-      code = "continue;\n";
+      if(code_gen::loop_goto.empty() || code_gen::loop_goto.top().first == -1){
+        yyerror("Cannot have continue outside a loop");
+        exit(1);
+      }
+      int start_loop = code_gen::loop_goto.top().first;
+      code = "goto " + code_gen::gen_label(start_loop) + ";\n";
     }
   });
 }
@@ -480,6 +513,7 @@ Comando::Comando(NovoBloco* novo_bloco):Node({novo_bloco}){
 Comando::Comando(Controle* controle):Node({controle}){
   exec = function<void()> ([&]() -> void
   {
+    children[0]->next = next;
     exec_children();
     code = children[0]->code;
   });
@@ -488,11 +522,13 @@ Comando::Comando(Controle* controle):Node({controle}){
 Comando::Comando(Repeticao* repeticao):Node({repeticao}){
   exec = function<void()> ([&]() -> void
   {
+    children[0]->next = next;
     exec_children();
     code = children[0]->code;
   });
 }
 
+// IMPRIMA
 Comando::Comando(ListaExpr* lista_expr):Node({lista_expr}){
   exec = function<void()> ([&]() -> void
   {
@@ -504,12 +540,26 @@ Comando::Comando(ListaExpr* lista_expr):Node({lista_expr}){
       }
     }
 
-    code = code_gen::concat_code({
-      "printf(",
-      "\"%d %d\"",
-      children[0]->code,
-      ");\n"
-    });
+    code = children[0]->code;
+    code += "printf(\"";
+    for(int i = 0; i < ((ListaExpr*) children[0])->type_list.size(); ++i){
+      auto type = ((ListaExpr*) children[0])->type_list[i];
+      if(type == INT_TYPE) code += "%d";
+      else if(type == FLUT_TYPE) code += "%f";
+      else if(type == CHAR_TYPE) code += "%c";
+
+      // if(i + 1 < ((ListaExpr*) children[0])->type_list.size()){
+      //   code += " ";
+      // }
+    }
+    code += "\", ";
+
+    for(int i = 0; i < ((ListaExpr*) children[0])->var_list.size(); ++i){
+      code += ((ListaExpr*) children[0])->var_list[i];
+      if(i + 1 < ((ListaExpr*) children[0])->var_list.size())
+        code += ", ";
+    }
+    code += ");\n";
   });
 }
 
@@ -522,11 +572,23 @@ Comando::Comando(Variavel* variavel):Node({variavel}){
       exit(1);
     }
 
+    code = children[0]->code;
+    code += "scanf(\"";
+
+    if(((Variavel*) children[0])->type == INT_TYPE){
+      code += "%d";
+    }else if(((Variavel*) children[0])->type == FLUT_TYPE){
+      code += "%f";
+    }else if(((Variavel*) children[0])->type == CHAR_TYPE){
+      code += "%c";
+    }else{
+
+    }
+    
     code = code_gen::concat_code({
-      "scanf(",
-      "%d",
-      ", ",
-      children[0]->code,
+      code,
+      "\", &",
+      ((Variavel*)children[0])->var,
       ");\n"
     });
   });
@@ -590,6 +652,7 @@ Atribuicao::Atribuicao(Variavel* variavel, Expr* expr)
     code = code_gen::concat_code({
       children[1]->code, 
       children[0]->code,
+      ((Variavel*) children[0])->var,
       " = ",
       ((Expr*) children[1])->var,
       ";\n"
@@ -603,9 +666,16 @@ ListaExpr::ListaExpr(Expr* expr, ListaExpr* lista_expr)
   {
     exec_children();
     type_list = {((Expr *)children[0])->type};
+    var_list = {((Expr *)children[0])->var};
+    code = children[0]->code;
+
     if(children[1]){
       for(auto expr_type : ((ListaExpr *)children[1])->type_list)
         type_list.push_back(expr_type);
+      for(auto expr_var : ((ListaExpr *)children[1])->var_list)
+        var_list.push_back(expr_var);
+
+      code = code_gen::concat_code({code, children[1]->code});
     }
   });
 }
@@ -613,6 +683,7 @@ ListaExpr::ListaExpr(Expr* expr, ListaExpr* lista_expr)
 Controle::Controle(Se* se):Node({se}){
   exec = function<void()> ([&]() -> void
   {
+    children[0]->next = next;
     exec_children();
     code = children[0]->code;
   }); 
@@ -621,6 +692,7 @@ Controle::Controle(Se* se):Node({se}){
 Controle::Controle(Escolha* escolha):Node({escolha}){
   exec = function<void()> ([&]() -> void
   {
+    children[0]->next = next;
     exec_children();
     code = children[0]->code;
   }); 
@@ -648,7 +720,7 @@ Se::Se(Expr* expr, Bloco* bloco, Senao* senao):Node({expr, bloco, senao}){
 
     code = code_gen::concat_code({
       children[0]->code,
-      code_gen::gen_label(((Expr*) children[0])->l_true), ":\n",
+      code_gen::gen_label(((Expr*) children[0])->l_true), ":;\n",
       children[1]->code
     });
 
@@ -656,7 +728,7 @@ Se::Se(Expr* expr, Bloco* bloco, Senao* senao):Node({expr, bloco, senao}){
       code = code_gen::concat_code({
         code,
         "goto ", code_gen::gen_label(next), ";\n",
-        code_gen::gen_label(((Expr*) children[0])->l_false), ":\n",
+        code_gen::gen_label(((Expr*) children[0])->l_false), ":;\n",
         children[2]->code
       }); 
     }
@@ -666,6 +738,7 @@ Se::Se(Expr* expr, Bloco* bloco, Senao* senao):Node({expr, bloco, senao}){
 Senao::Senao(Bloco *bloco):Node({bloco}){
   exec = function<void()> ([&]() -> void
   {
+    children[0]->next = next;
     exec_children();
     code = children[0]->code;
   }); 
@@ -674,6 +747,7 @@ Senao::Senao(Bloco *bloco):Node({bloco}){
 Senao::Senao(Se* se):Node({se}){
   exec = function<void()> ([&]() -> void
   {
+    children[0]->next = next;
     exec_children();
     code = children[0]->code;
   }); 
@@ -682,74 +756,165 @@ Senao::Senao(Se* se):Node({se}){
 Escolha::Escolha(Expr* expr, ListaCasos* lista_casos):Node({expr, lista_casos}){
   exec = function<void()> ([&]() -> void
   {
-    exec_children();
-    auto type = ((Expr*) children[0])->type;
-    auto merge_type = binary_operand(
-      UNION,
-      type,
-      ((ListaCasos*) children[1])->type
-    );
-    if(type != merge_type){
-      yyerror("Cases types do not match guard expression type");
-      exit(1);
-    }
+    int before_guard = -1;
+    if(!code_gen::loop_goto.empty())
+      before_guard = code_gen::loop_goto.top().first;
+    
+    code_gen::loop_goto.push({before_guard, next});
+    children[0]->exec();
+    ((ListaCasos*) children[1])->switch_nxt = next;
+    ((ListaCasos*) children[1])->guard_var = ((Expr*) children[0])->var;
+    children[1]->exec();
+
+    code_gen::loop_goto.pop();
+
+    code = code_gen::concat_code({
+      children[0]->code,
+      children[1]->code      
+    });
   });
 }
 
-ListaCasos::ListaCasos(EscolhaPadrao* escolha_padrao):Node({escolha_padrao}), type(INT_TYPE){}
+ListaCasos::ListaCasos(EscolhaPadrao* escolha_padrao):Node({escolha_padrao}){
+  exec = function<void()> ([&]() -> void
+  {
+    ((EscolhaPadrao*) children[0])->switch_nxt = switch_nxt;
+    exec_children();
+    code = children[0]->code;
+  });
+}
 
 ListaCasos::ListaCasos(CasoEscolha* caso_escolha, ListaCasos* lista_casos)
 :Node({caso_escolha, lista_casos}){
   exec = function<void()> ([&]() -> void
   {
-    exec_children();
-    type = ((CasoEscolha*) children[0])->type;
+    int case_nxt = code_gen::get_next_label();
+
     if(children[1]){
-      type = binary_operand(
-        UNION,
-        type,
-        ((ListaCasos*) children[1])->type
-      );
+      ((ListaCasos*) children[1])->switch_nxt = switch_nxt;
+      ((ListaCasos*) children[1])->guard_var = guard_var;
+    }
+
+    ((CasoEscolha*) children[0])->switch_nxt = switch_nxt;
+    ((CasoEscolha*) children[0])->guard_var = guard_var;
+    ((CasoEscolha*) children[0])->case_nxt = case_nxt;
+
+    exec_children();
+
+    code = code_gen::concat_code({
+      children[0]->code,
+      code_gen::gen_label(case_nxt), ":;\n"
+    });
+
+    if(children[1]){
+      code = code_gen::concat_code({code, children[1]->code});
     }
   });
 }
 
-EscolhaPadrao::EscolhaPadrao(Comando* comando):Node({comando}){}
+EscolhaPadrao::EscolhaPadrao(Comando* comando):Node({comando}){
+  exec = function<void()> ([&]() -> void
+  {
+    exec_children();
+    code = children[0]->code;
+  });
+}
 
-CasoEscolha::CasoEscolha(ExprConst* expr_const, Comando* comando)
+CasoEscolha::CasoEscolha(Expr* expr_const, Comando* comando)
 :Node({expr_const, comando}){
   exec = function<void()> ([&]() -> void
   {
     exec_children();
-    type = ((ExprConst*) children[0])->type;
+
+    // checar se tipo ta safe
+   
+    code = code_gen::concat_code({
+      children[0]->code,
+      "if(!(", ((Expr*) children[0])->var, " == ", guard_var, ")) goto ", code_gen::gen_label(case_nxt), ";\n",
+      children[1]->code
+    });
   });
 }
 
-Repeticao::Repeticao(Enquanto *enquanto):Node({enquanto}){}
+Repeticao::Repeticao(Enquanto *enquanto):Node({enquanto}){
+  exec = function<void()> ([&]() -> void
+  {
+    children[0]->next = next;
+    exec_children();
+    code = children[0]->code;
+  });
+}
 
-Repeticao::Repeticao(FacaEnquanto *faca_enquanto):Node({faca_enquanto}){}
+Repeticao::Repeticao(FacaEnquanto *faca_enquanto):Node({faca_enquanto}){
+  exec = function<void()> ([&]() -> void
+  {
+    children[0]->next = next;
+    exec_children();
+    code = children[0]->code;
+  });
+}
 
-Repeticao::Repeticao(Para *para):Node({para}){}
+Repeticao::Repeticao(Para *para):Node({para}){
+  exec = function<void()> ([&]() -> void
+  {
+    children[0]->next = next;
+    exec_children();
+    code = children[0]->code;
+  });
+}
 
 Enquanto::Enquanto(Expr* expr, Bloco* bloco):Node({expr, bloco}){
   exec = function<void()> ([&]() -> void
   {
+    int before_guard = code_gen::get_next_label();
+    int inside_loop = code_gen::get_next_label();
+
+    ((Expr*) children[0])->l_false = next;
+    ((Expr*) children[0])->l_true = inside_loop;
+
+    code_gen::loop_goto.push({before_guard, next});
     exec_children();
+    code_gen::loop_goto.pop();
+
     if(((Expr*) children[0])->type != BOOL_TYPE){
       yyerror("Expression type in loop guard is not boolean");
       exit(1);
     }
+
+    code = code_gen::concat_code({
+      code_gen::gen_label(before_guard), ":;\n",
+      children[0]->code,
+      code_gen::gen_label(inside_loop), ":;\n",
+      // "if(!(", ((Expr*) children[0])->var, ")) goto ", code_gen::gen_label(next), ";\n",
+      children[1]->code,
+      "goto ", code_gen::gen_label(before_guard), ";\n",
+    });
   });
 }
 
+// do while
 FacaEnquanto::FacaEnquanto(Bloco* bloco, Expr* expr):Node({bloco, expr}){
   exec = function<void()> ([&]() -> void
   {
+    int inside_loop = code_gen::get_next_label();
+
+    ((Expr*) children[1])->l_false = next;
+    ((Expr*) children[1])->l_true = inside_loop;
+
+    code_gen::loop_goto.push({inside_loop, next});
     exec_children();
+    code_gen::loop_goto.pop();
+
     if(((Expr*) children[1])->type != BOOL_TYPE){
       yyerror("Expression type in loop guard is not boolean");
       exit(1);
     }
+
+    code = code_gen::concat_code({
+      code_gen::gen_label(inside_loop), ":;\n",
+      children[0]->code,
+      children[1]->code
+    });
   });
 }
 
@@ -757,11 +922,30 @@ Para::Para(Atribuicao* atribuicao1, Expr* expr, Atribuicao* atribuicao2, Bloco* 
 :Node({atribuicao1, expr, atribuicao2, bloco}){
   exec = function<void()> ([&]() -> void
   {
+    int before_guard = code_gen::get_next_label();
+    int inside_loop = code_gen::get_next_label();
+
+    ((Expr*) children[1])->l_false = next;
+    ((Expr*) children[1])->l_true = inside_loop;
+
+    code_gen::loop_goto.push({before_guard, next});
     exec_children();
+    code_gen::loop_goto.pop();
+
     if(((Expr*) children[1])->type != BOOL_TYPE){
       yyerror("Expression type in loop guard is not boolean");
       exit(1);
     }
+
+    code = code_gen::concat_code({
+      children[0]->code, // TEM ;?
+      code_gen::gen_label(before_guard), ":;\n",
+      children[1]->code,
+      code_gen::gen_label(inside_loop), ":;\n",
+      children[3]->code,
+      children[2]->code,
+      "goto ", code_gen::gen_label(before_guard), ";\n",
+    });
   });
 }
 
@@ -784,25 +968,24 @@ Variavel::Variavel(string* _id, ListaModificadores* lista_modificadores)
 
     type = ((Variable*) entry)->type;
 
+    var = *id;
 
     if(children[0]){
+      code = children[0]->code;
+
       type = modify_type(type, ((ListaModificadores*) children[0])->modifiers);
       if(type == nullptr){
         yyerror("Failed to modify variable type");
         exit(1);
       }
-      code = children[0]->code;
 
-      code = code_gen::concat_code({code, *id});
       for(auto modifier : ((ListaModificadores*) children[0])->modifiers){
         if(modifier.is_idx){
-          code += "[" + *modifier.name + "]";
+          var += "[" + *modifier.name + "]";
         }else{
-          code += "." + *modifier.name;
+          var += "." + *modifier.name;
         }
       }
-    }else{
-      code = *id;
     }
   });
 }
@@ -831,7 +1014,8 @@ ModificadorVariavel::ModificadorVariavel(string *id){
 ModificadorVariavel::ModificadorVariavel(Expr* expr):Node({expr}){
   exec = function<void()> ([&]() -> void
   {
-    if(((Expr*) children[0])->type != INT_TYPE){
+    exec_children();
+    if(((Expr*) children[0])->type == INT_TYPE){
       modifier = Modifier(&((Expr*) children[0])->var, true);
       code = children[0]->code;
     }else{
@@ -853,16 +1037,26 @@ Literal::Literal(LiteralLogico* literal_logico){
 Literal::Literal(int int_val){
   type = INT_TYPE;
   value.int_ = int_val;
+  code = to_string(int_val);
 }
 
 Literal::Literal(char carac_val){
   type = CHAR_TYPE;
   value.carac = carac_val;
+  if(carac_val == '\n'){
+    code = "\'  \'";
+    code[1] = '\\';    
+    code[2] = 'n';    
+  }else{
+    code = "\' \'";
+    code[1] = carac_val;
+  }
 }
 
 Literal::Literal(float flut_val){
   type = FLUT_TYPE;
   value.flut = flut_val;
+  code = to_string(flut_val);
 }
 
 Literal::Literal(LiteralArray *literal_array)
@@ -1029,6 +1223,20 @@ Expr::Expr(Expr* expr1, OP _operand, Expr* expr2)
 Expr::Expr(OP _operand, Expr* expr):Node({expr}), operand(_operand){
   exec = function<void()> ([&]() -> void
   {
+    int true_case = l_true, false_case = l_false;
+    int nxt_op = -1;
+   
+    if(operand == NOT){
+      if(true_case == -1 && false_case == -1){
+        true_case = code_gen::get_next_label();
+        false_case = code_gen::get_next_label();
+      }
+      ((Expr*) children[0])->l_true = false_case;
+      ((Expr*) children[0])->l_false = true_case;
+    }else{
+      ((Expr*) children[0])->l_true = ((Expr*) children[0])->l_false = -1;
+    }
+
     exec_children();
     type = unary_operand(operand, ((Expr*) children[0])->type);
     if(type == nullptr){
@@ -1036,18 +1244,34 @@ Expr::Expr(OP _operand, Expr* expr):Node({expr}), operand(_operand){
       exit(1);
     }
 
-    var = code_gen::gen_var(type->name);
-    code = code_gen::concat_code({
-      children[0]->code,
-      var,
-      " = ",
-      code_gen::get_op_name(operand),
-      ((Expr*) children[0])->var,
-      ";\n"
-    });
+    if(operand == NOT){
+      if(l_true == -1 && l_false == -1){
+        var = code_gen::gen_var(type->name);
+
+        code = code_gen::concat_code({
+          code,
+          var, " = ", code_gen::get_op_name(operand), " ", ((Expr*) children[0])->var,
+          ";\n"
+        });
+      }else{
+        // ja vai ter gotozado
+      }
+    }else{
+      var = code_gen::gen_var(type->name);
+      code = code_gen::concat_code({
+        children[0]->code,
+        var,
+        " = ",
+        code_gen::get_op_name(operand),
+        ((Expr*) children[0])->var,
+        ";\n"
+      });
+    }
+
   });
 }
 
+// ? cast de q?
 Expr::Expr(Tipo *tipo, Expr* expr):Node({tipo, expr}){
   exec = function<void()> ([&]() -> void
   {
@@ -1118,7 +1342,8 @@ FolhaExpr::FolhaExpr(Literal* literal):Node({literal}){
     code = code_gen::concat_code({
       var,
       " = ",
-      children[0]->code
+      children[0]->code,
+      ";\n"
     });
   });
 }
@@ -1128,7 +1353,8 @@ FolhaExpr::FolhaExpr(Variavel* variavel):Node({variavel}){
   {
     exec_children();
     type = ((Variavel*) children[0])->type;
-    var = children[0]->code;
+    var = ((Variavel*) children[0])->var;
+    code = children[0]->code;
   });
 }
 
@@ -1181,53 +1407,18 @@ ExprConst::ExprConst(ExprConst* expr1, OP _operand, ExprConst* expr2)
       yyerror("Uncompatible operands");
       exit(1);
     }
-  });
-}
 
-ExprConst::ExprConst(OP _operand, ExprConst* expr)
-:Node({expr}), operand(_operand){
-  exec = function<void()> ([&]() -> void
-  {
-    exec_children();
-    type = unary_operand(operand, ((ExprConst*) children[0])->type);
-    if(type == nullptr){
-      yyerror("Uncompatible operand");
-      exit(1);
+    if(type == INT_TYPE){
+      if(operand == PLUS)
+        value.int_ = ((ExprConst*) children[0])->value.int_ + ((ExprConst*) children[1])->value.int_;
+      else if(operand == MINUS)
+        value.int_ = ((ExprConst*) children[0])->value.int_ - ((ExprConst*) children[1])->value.int_;
+      else exit(1);
     }
   });
 }
 
-ExprConst::ExprConst(Tipo *tipo, ExprConst* expr)
-:Node({tipo, expr}){
-  exec = function<void()> ([&]() -> void
-  {
-    exec_children();
-    type = casting_result(((Tipo*) children[0])->type, ((ExprConst*) children[1])->type);
-    if(type == nullptr){
-      yyerror("Uncompatible casting");
-      exit(1);
-    }
-  });
-}
-
-ExprConst::ExprConst(ExprConst* expr):Node({expr}){
-  exec = function<void()> ([&]() -> void
-  {
-    exec_children();
-    type = ((ExprConst*) children[0])->type;
-  });
-}
-
-ExprConst::ExprConst(FolhaExprConst* folha_expr):Node({folha_expr}){
-  exec = function<void()> ([&]() -> void
-  {
-    exec_children();
-    type = ((FolhaExprConst*) children[0])->type;
-    value = ((FolhaExprConst*) children[0])->value;
-  });
-}
-
-FolhaExprConst::FolhaExprConst(Literal* literal):Node({literal}){
+ExprConst::ExprConst(Literal* literal):Node({literal}){
   exec = function<void()> ([&]() -> void
   {
     exec_children();

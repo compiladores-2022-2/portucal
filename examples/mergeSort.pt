@@ -1,0 +1,73 @@
+declrs{
+    tipo Inter = estrutura{
+        l, r: int
+    };
+
+    var n, i, curr_flag, nxt_flag, j, il, ir, k, l : int;
+    var V, tmp : int[100];
+    var inters : Inter[100][2];
+    var num_inters : int
+}
+
+bloco{
+    leia(n);
+    curr_flag = 0;
+    para(i = 0; i < n; i = i + 1){
+        leia(V[i]);
+        inters[i][curr_flag].l = i;
+        inters[i][curr_flag].r = i
+    };
+    num_inters = n;
+
+    enquanto(num_inters > 1){
+        nxt_flag = 1 - curr_flag;
+        j = 0;
+
+
+        para(i = 0; i + 1 < num_inters; i = i + 2){
+            il = inters[i][curr_flag].l;
+            ir = inters[i + 1][curr_flag].l;
+            k = 0;
+            enquanto(il <= inters[i][curr_flag].r ou ir <= inters[i + 1][curr_flag].r){
+                se(il > inters[i][curr_flag].r){
+                    tmp[k] = V[ir];
+                    ir = ir + 1
+                }senao se(ir > inters[i + 1][curr_flag].r){
+                    tmp[k] = V[il];
+                    il = il + 1
+                }senao{
+                    se(V[ir] < V[il]){
+                        tmp[k] = V[ir];
+                        ir = ir + 1
+                    }senao{
+                        tmp[k] = V[il];
+                        il = il + 1
+                    }
+                };
+                k = k + 1
+            };
+
+            inters[j][nxt_flag].l = inters[i][curr_flag].l;
+            inters[j][nxt_flag].r = inters[i + 1][curr_flag].r;
+
+            para(l = 0; l < k; l = l + 1){
+                V[inters[j][nxt_flag].l + l] = tmp[l]
+            };
+            j = j + 1
+        };
+
+        se(num_inters mod 2 == 1){
+            inters[j][nxt_flag] = inters[num_inters - 1][curr_flag];
+            j = j + 1
+        };
+
+        num_inters = j;
+        curr_flag = nxt_flag
+    };
+
+    para(i = 0; i < n; i = i + 1){
+        escreva(V[i], ' ')
+    };
+
+    escreva('\n')
+}

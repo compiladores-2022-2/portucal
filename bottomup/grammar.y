@@ -69,6 +69,7 @@ int collumn_counter = 0;
 // %token <iValue> INTEGER_LITERAL
 
 %token LIT_FLUT LIT_INT LIT_CHAR LIT_STRING
+%token EOL
 %token ENQUANTO FACA PARA
 %token PARE CONTINUE
 %token SE SENAO ESCOLHA CASO PADRAO
@@ -230,7 +231,7 @@ lista_casos : escolha_padrao                            {$$ = new ListaCasos($1)
 escolha_padrao : PADRAO ':' comando                     {$$ = new EscolhaPadrao($3);}
   ;
 
-caso_escolha : CASO expr_const ':' comando              {$$ = new CasoEscolha($2, $4);}
+caso_escolha : CASO expr ':' comando              {$$ = new CasoEscolha($2, $4);}
   ;
 
 repeticao : enquanto                                    {$$ = new Repeticao($1);}
@@ -267,6 +268,7 @@ literal : literal_logico                              {$$ = new Literal($1);}
   | LIT_INT                                           {$$ = new Literal(stoi(yytext));}
   | LIT_FLUT                                          {$$ = new Literal(stof(yytext));}
   | LIT_CHAR                                          {$$ = new Literal(yytext[1]);}
+  | EOL                                               {$$ = new Literal('\n');}
   | literal_array                                     {$$ = new Literal($1);}
   ;
 
@@ -312,30 +314,11 @@ folha_expr : literal                                  {$$ = new FolhaExpr($1);}
   | ID '(' lista_expr ')' lista_modificadores         {$$ = new FolhaExpr($1, $3, $5); }
   ;
 
-expr_const : expr_const '+' expr_const                                  {$$ = new ExprConst($1, PLUS, $3);}
-  | expr_const '-' expr_const                                     {$$ = new ExprConst($1, MINUS, $3);}
-  | expr_const '*' expr_const                                     {$$ = new ExprConst($1, TIMES, $3);}
-  | expr_const MOD expr_const                                     {$$ = new ExprConst($1, MODOP, $3);}
-  | expr_const '/' expr_const                                     {$$ = new ExprConst($1, DIV, $3);}
-  | expr_const '^' expr_const                                     {$$ = new ExprConst($1, EXP, $3);}
-  | expr_const IGUAL_IGUAL expr_const                             {$$ = new ExprConst($1, EQ, $3);}
-  | expr_const DIFERENTE expr_const                               {$$ = new ExprConst($1, DIF, $3);}
-  | expr_const MENOR_IGUAL expr_const                             {$$ = new ExprConst($1, LEQ, $3);}
-  | expr_const MAIOR_IGUAL expr_const                             {$$ = new ExprConst($1, GEQ, $3);}
-  | expr_const '<' expr_const                                     {$$ = new ExprConst($1, LESS, $3);}
-  | expr_const '>' expr_const                                     {$$ = new ExprConst($1, GREATER, $3);}
-  | expr_const 'e' expr_const                                     {$$ = new ExprConst($1, AND, $3);}
-  | expr_const OU expr_const                                      {$$ = new ExprConst($1, OR, $3);}
-  | '+' expr_const %prec UPLUS                              {$$ = new ExprConst(UNARY_PLUS, $2);}
-  | '-' expr_const %prec UMINUS                             {$$ = new ExprConst(UNARY_MINUS, $2);}
-  | '!' expr_const                                          {$$ = new ExprConst(NOT, $2);}
-  | '%' tipo '%' expr_const %prec CASTING                   {$$ = new ExprConst($2, $4);}
-  | '(' expr_const ')'                                      {$$ = new ExprConst($2);}
-  | folha_expr_const                                        {$$ = new ExprConst($1);}
+expr_const : expr_const '+' expr_const             {$$ = new ExprConst($1, PLUS, $3);}
+  | expr_const '-' expr_const                      {$$ = new ExprConst($1, MINUS, $3);}
+  | literal                                        {$$ = new ExprConst($1);}
   ;
 
-folha_expr_const : literal                                  {$$ = new FolhaExprConst($1);}
-  ;
 
 %% /* Fim da segunda seção */
 

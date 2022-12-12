@@ -256,6 +256,7 @@ public:
 class ListaExpr : public Node{
 public:
   vector<Type*> type_list;
+  vector<string> var_list;
 
   ListaExpr(Expr* expr, ListaExpr* lista_expr = nullptr);
 };
@@ -285,19 +286,25 @@ public:
 class ListaCasos : public Node{
 public:
   Type* type;
+  string guard_var;
+  int switch_nxt;
+
   ListaCasos(EscolhaPadrao* escolha_padrao);
   ListaCasos(CasoEscolha* caso_escolha, ListaCasos* lista_casos = nullptr);
 };
 
 class EscolhaPadrao : public Node{
 public:
+  int switch_nxt;
   EscolhaPadrao(Comando* comando);
 };
 
 class CasoEscolha : public Node{
 public:
   Type* type;
-  CasoEscolha(ExprConst* expr_const, Comando* comando);
+  string guard_var;
+  int switch_nxt, case_nxt;
+  CasoEscolha(Expr* expr_const, Comando* comando);
 };
 
 class Repeticao : public Node{
@@ -331,6 +338,7 @@ class Variavel : public Node{
 public:
   Type *type;
   string* id;
+  string var;
 
   Variavel(string* _id, ListaModificadores* lista_modificadores = nullptr);
 };
@@ -418,18 +426,7 @@ public:
   Value value;
 
   ExprConst(ExprConst* expr1, OP _operand, ExprConst* expr2);
-  ExprConst(OP operand, ExprConst* expr);
-  ExprConst(Tipo *_t, ExprConst* expr);
-  ExprConst(ExprConst* expr);
-  ExprConst(FolhaExprConst* folha_expr);
-};
-
-class FolhaExprConst : public Node{
-public:
-  Type* type;
-  Value value;
-
-  FolhaExprConst(Literal* literal);
+  ExprConst(Literal* literal);
 };
 
 

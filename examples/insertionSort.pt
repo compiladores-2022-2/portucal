@@ -1,0 +1,28 @@
+declrs {
+  var a, b: int[1000];
+  var i, j, tmp : int;
+  var n : int
+}
+
+bloco{
+  leia(n);
+  para(i = 0; i < n; i = i + 1){
+    leia(b[i])
+  };
+
+  para(i = 0; i < n; i = i + 1){
+    para(j = i + 1; j < n; j = j + 1){
+      se(b[i] > b[j]){
+        tmp = b[j];
+        b[j] = b[i];
+        b[i] = tmp
+      }
+    }
+  };
+
+  para(i = 0; i < n; i = i + 1){
+    escreva(b[i], ' ')
+  };
+
+  escreva('\n')
+}
