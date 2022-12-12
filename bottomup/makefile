@@ -35,4 +35,4 @@ $(yacc): $(input_grammar)
 	@echo Generating C intermediate code in ./out/$(@F).c
 	./parser < $@ > out/$(@F).c
 	@echo Generating executable in ./out/$(@F)
-	gcc $@.c -o out/$(basename $(@F))
+	gcc ./out/$(@F).c -o out/$(basename $(@F))
