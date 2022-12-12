@@ -9,3 +9,4 @@ table.html
 __pycache__/
 parser
 tmp/
+out/
